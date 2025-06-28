@@ -1,0 +1,104 @@
+diff --git a/dlls/ntdll/unix/file.c b/dlls/ntdll/unix/file.c
+index 8d2809ca193..024f4ed6fba 100644
+--- a/dlls/ntdll/unix/file.c
++++ b/dlls/ntdll/unix/file.c
+@@ -7348,6 +7348,34 @@ NTSTATUS WINAPI NtQueryObject( HANDLE handle, OBJECT_INFORMATION_CLASS info_clas
+     case ObjectNameInformation:
+     {
+         OBJECT_NAME_INFORMATION *p = ptr;
++        char *unix_name;
++        WCHAR *nt_name;
++
++        /* first try as a file object */
++
++        if (!(status = server_get_unix_name( handle, &unix_name )))
++        {
++            if (!(status = unix_to_nt_file_name( unix_name, &nt_name )))
++            {
++                ULONG size = (wcslen(nt_name) + 1) * sizeof(WCHAR);
++                if (len < sizeof(*p)) status = STATUS_INFO_LENGTH_MISMATCH;
++                else if (len < sizeof(*p) + size) status = STATUS_BUFFER_OVERFLOW;
++                else
++                {
++                    p->Name.Buffer = (WCHAR *)(p + 1);
++                    p->Name.Length = size - sizeof(WCHAR);
++                    p->Name.MaximumLength = size;
++                    wcscpy( p->Name.Buffer, nt_name );
++                }
++                if (used_len) *used_len = sizeof(*p) + size;
++                free( nt_name );
++            }
++            free( unix_name );
++            break;
++        }
++        else if (status != STATUS_OBJECT_TYPE_MISMATCH) break;
++
++        /* not a file, treat as a generic object */
+ 
+         SERVER_START_REQ( get_object_name )
+         {
+diff --git a/server/change.c b/server/change.c
+index 02c01610d4d..f42ce066340 100644
+--- a/server/change.c
++++ b/server/change.c
+@@ -118,7 +118,7 @@ static const struct object_ops dir_ops =
+     default_map_access,       /* map_access */
+     dir_get_sd,               /* get_sd */
+     dir_set_sd,               /* set_sd */
+-    default_fd_get_full_name, /* get_full_name */
++    no_get_full_name,         /* get_full_name */
+     no_lookup_name,           /* lookup_name */
+     no_link_name,             /* link_name */
+     NULL,                     /* unlink_name */
+diff --git a/server/fd.c b/server/fd.c
+index f3eaccab6e5..bb0e90d99d0 100644
+--- a/server/fd.c
++++ b/server/fd.c
+@@ -2178,22 +2178,6 @@ int default_fd_signaled( struct object *obj, struct wait_queue_entry *entry )
+     return ret;
+ }
+ 
+-/* default get_full_name() routine for objects with an fd */
+-WCHAR *default_fd_get_full_name( struct object *obj, data_size_t max, data_size_t *ret_len )
+-{
+-    struct fd *fd = get_obj_fd( obj );
+-    WCHAR *ret = NULL;
+-
+-    if (fd->nt_name)
+-    {
+-        *ret_len = fd->nt_namelen;
+-        ret = memdup( fd->nt_name, fd->nt_namelen );
+-    }
+-    release_object( fd );
+-    if (*ret_len > max) set_error( STATUS_BUFFER_OVERFLOW );
+-    return ret;
+-}
+-
+ int default_fd_get_poll_events( struct fd *fd )
+ {
+     int events = 0;
+diff --git a/server/file.c b/server/file.c
+index 230bf1452ea..8f6566a0077 100644
+--- a/server/file.c
++++ b/server/file.c
+@@ -100,7 +100,7 @@ static const struct object_ops file_ops =
+     default_map_access,           /* map_access */
+     file_get_sd,                  /* get_sd */
+     file_set_sd,                  /* set_sd */
+-    default_fd_get_full_name,     /* get_full_name */
++    no_get_full_name,             /* get_full_name */
+     file_lookup_name,             /* lookup_name */
+     no_link_name,                 /* link_name */
+     NULL,                         /* unlink_name */
+diff --git a/server/file.h b/server/file.h
+index 7742e705e49..4510a8b4e88 100644
+--- a/server/file.h
++++ b/server/file.h
+@@ -109,7 +109,6 @@ extern char *dup_fd_name( struct fd *root, const char *name ) __WINE_DEALLOC(fre
+ extern void get_nt_name( struct fd *fd, struct unicode_str *name );
+ 
+ extern int default_fd_signaled( struct object *obj, struct wait_queue_entry *entry );
+-extern WCHAR *default_fd_get_full_name( struct object *obj, data_size_t max, data_size_t *ret_len );
+ extern int default_fd_get_poll_events( struct fd *fd );
+ extern void default_poll_event( struct fd *fd, int event );
+ extern void fd_cancel_async( struct fd *fd, struct async *async );

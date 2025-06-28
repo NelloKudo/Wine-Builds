@@ -1,7 +1,7 @@
 From 0304a425fd7832e1692d224388e411ae253a70fe Mon Sep 17 00:00:00 2001
 From: Brendan McGrath <bmcgrath@codeweavers.com>
 Date: Thu, 18 Jul 2024 17:55:53 +1000
-Subject: [PATCH] winegstreamer: Remove 'au' alignment for h264.
+Subject: [PATCH 0259/1564] winegstreamer: Remove 'au' alignment for h264.
 
 h264parse does not correctly determine 'nal' alignment if this caps is
 provided.
@@ -38,5 +38,4 @@ index 3e0effcbe66..c26a6518a02 100644
      if (format_size > sizeof(*format) && (buffer = gst_buffer_new_and_alloc(format_size - sizeof(*format))))
      {
 -- 
-2.50.0
-
+2.49.0
