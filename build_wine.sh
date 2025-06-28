@@ -41,6 +41,9 @@ export WINE_BRANCH="${WINE_BRANCH:-staging}"
 # Keeping track of the releases versions
 export RELEASE_VERSION="${RELEASE_VERSION:-1}"
 
+# Switch to enable esync/fsync + reverts build
+export USE_FSYNC="${USE_FSYNC:-false}"
+
 # Available proton branches: proton_3.7, proton_3.16, proton_4.2, proton_4.11
 # proton_5.0, proton_5.13, experimental_5.13, proton_6.3, experimental_6.3
 # proton_7.0, experimental_7.0, proton_8.0, experimental_8.0, experimental_9.0
@@ -272,13 +275,13 @@ else
 
 			upstream_commit="$(cat wine-staging-"${WINE_VERSION}"/staging/upstream-commit | head -c 7)"
 			git -C wine checkout "${upstream_commit}"
-			BUILD_NAME="${WINE_VERSION}-${upstream_commit}-staging"
+			BUILD_NAME="spritz-${WINE_VERSION}-$RELEASE_VERSION-${upstream_commit}-staging-tkg-aagl"
 		else
 			if [ -n "${STAGING_VERSION}" ]; then
 				WINE_VERSION="${STAGING_VERSION}"
 			fi
 
-			BUILD_NAME="${WINE_VERSION}"-staging
+			BUILD_NAME="spritz-${WINE_VERSION}-$RELEASE_VERSION-staging-tkg-aagl"
 
 			wget -q --show-progress "https://github.com/wine-staging/wine-staging/archive/v${WINE_VERSION}.tar.gz"
 			tar xf v"${WINE_VERSION}".tar.gz
@@ -321,13 +324,39 @@ fi
 
 cd wine || exit 1
 
-# Applying patches (fails if no patches are in the folder)
-if [ -d "$scriptdir"/patches/ ]; then
-	for p in "$scriptdir"/patches/*.patch; do
-		echo "Applying patch $p.."
-		patch -Np1 -i "$p" || (echo "Applying patch $p failed.." && exit 1)
-	done
+# Applying custom patches
+patchlist=()
+pattern=( "(" "-regex" ".*\.patch" )
+
+# Spritz-Wine: enable esync/fsync + reverts for non-ntsync builds
+# Also disable ntsync patches for fsync
+if [ "$USE_FSYNC" = "true" ]; then
+	pattern+=( ")" "-a" "(" "-not" "-regex" ".*/0005-ntsync-fixes/.*\.patch" )
+	echo "Spritz-Wine: Building fsync.."
+	BUILD_NAME_SUFFIX="-fsync"
+else
+	pattern+=( ")" "-a" "(" "-not" "-regex" ".*/0002-staging-esync-fsync/.*\.patch" )
+	BUILD_NAME_SUFFIX="-ntsync"
 fi
+
+BUILD_NAME="${BUILD_NAME}${BUILD_NAME_SUFFIX}"
+pattern+=( ")" )
+
+mapfile -t patchlist_tmp < <(find "$scriptdir/patches" -type f "${pattern[@]}" | LC_ALL=C sort -f)
+patchlist+=("${patchlist_tmp[@]}")
+
+# Apply patches
+for patch in "${patchlist[@]}"; do
+	[ -f "${patch}" ] || continue
+	echo "Applying patch: $(realpath --relative-to="$scriptdir/patches" "${patch}")"
+	patch -Np1 -i "${patch}" &>> "$scriptdir/patches.log" || {
+    	echo "Failed to apply patch: ${patch}"
+    	exit 1
+	}
+done
+
+# Clean up any leftover .orig files
+find "${BUILD_DIR}/wine" -type f -name '*.orig' -delete || true
 
 dlls/winevulkan/make_vulkan
 tools/make_requests

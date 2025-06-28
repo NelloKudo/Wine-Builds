@@ -8,18 +8,14 @@ on:
 
 jobs:
   build:
+    name: Building Spritz-Wine-${{ matrix.variant }}
+    runs-on: ubuntu-22.04
+
     strategy:
       matrix:
-        config:
-          - name: Spritz-Wine-TkG-AAGL
-            branch: staging-tkg
-            allow_fail: false
-          - name: Spritz-Wine-TkG-AAGL-ntsync
-            branch: staging-tkg-ntsync
-            allow_fail: true
-
-    runs-on: ubuntu-22.04
-    continue-on-error: ${{ matrix.config.allow_fail }}
+        variant:
+          - NTsync
+          - Fsync
 
     steps:
       - uses: actions/checkout@v4
@@ -36,9 +32,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/.ccache
-          key: ccache-${{ matrix.config.name }}-${{ github.run_id }}
+          key: ccache-${{ matrix.variant }}-${{ github.run_id }}
           restore-keys: |
-            ccache-${{ matrix.config.name }}-
+            ccache-${{ matrix.variant }}-
 
       - name: Build Wine
         run: |
@@ -48,7 +44,9 @@ jobs:
           chmod +x build_wine.sh
           export EXPERIMENTAL_WOW64="true"
           export USE_CCACHE="true"
-          WINE_BRANCH=${{ matrix.config.branch }} ./build_wine.sh
+          export WINE_BRANCH="staging"
+          export USE_FSYNC="${{ matrix.variant == 'fsync' }}" 
+          ./build_wine.sh
           sha256sum *.tar.xz
 
       - name: Save ccache
@@ -60,7 +58,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.config.name }}
+          name: Spritz-Wine-TkG-${{ matrix.variant }}
           path: ./*.tar.xz
 
   release:
@@ -84,6 +82,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2.2.1
         with:
-          files: artifacts/*.tar.xz
+          files: artifacts/*/*.tar.xz
           name: "Spritz-Wine-TkG-AAGL-${{ steps.extract_version.outputs.version }}"
           make_latest: true
