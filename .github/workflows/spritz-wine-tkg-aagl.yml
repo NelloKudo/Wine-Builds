@@ -46,7 +46,6 @@ jobs:
           sudo apt install -y debootstrap perl git wget xz-utils bubblewrap autoconf ccache
           sudo tar -C /opt -xpf /opt/Bootstraps/bootstraps.tar.xz
           chmod +x build_wine.sh
-          export EXPERIMENTAL_WOW64="true"
           export USE_CCACHE="true"
           WINE_BRANCH=${{ matrix.config.branch }} ./build_wine.sh
           sha256sum *.tar.xz
