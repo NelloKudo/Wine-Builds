@@ -19,8 +19,8 @@ if ! command -v debootstrap 1>/dev/null || ! command -v perl 1>/dev/null; then
 fi
 
 # Keep in mind that although you can choose any version of Ubuntu/Debian
-# here, but this script has only been tested with Ubuntu 18.04 Bionic
-export CHROOT_DISTRO="bionic"
+# here, but this script has only been tested with Ubuntu 20.04 Focal
+export CHROOT_DISTRO="focal"
 export CHROOT_MIRROR="https://ftp.uni-stuttgart.de/ubuntu/"
 
 # Set your preferred path for storing chroots
@@ -28,15 +28,10 @@ export CHROOT_MIRROR="https://ftp.uni-stuttgart.de/ubuntu/"
 # script, if you are going to use it
 export MAINDIR=/opt/chroots
 export CHROOT_X64="${MAINDIR}"/${CHROOT_DISTRO}64_chroot
-export CHROOT_X32="${MAINDIR}"/${CHROOT_DISTRO}32_chroot
 
 prepare_chroot () {
-	if [ "$1" = "32" ]; then
-		CHROOT_PATH="${CHROOT_X32}"
-	else
-		CHROOT_PATH="${CHROOT_X64}"
-	fi
-
+	CHROOT_PATH="${CHROOT_X64}"
+	
 	echo "Unmount chroot directories. Just in case."
 	umount -Rl "${CHROOT_PATH}"
 
@@ -66,18 +61,8 @@ prepare_chroot () {
 }
 
 create_build_scripts () {
-	sdl2_version="2.26.4"
-	faudio_version="23.03"
-	vulkan_headers_version="1.4.304"
-	vulkan_loader_version="1.4.304"
-	spirv_headers_version="sdk-1.3.239.0"
  	libpcap_version="1.10.4"
   	libxkbcommon_version="1.6.0"
-   	python3_version="3.12.4"
-    	meson_version="1.3.2"
-     	cmake_version="3.30.3"
-      	ccache_version="4.10.2"
-        libglvnd_version="1.7.0"
 
 	cat <<EOF > "${MAINDIR}"/prepare_chroot.sh
 #!/bin/bash
@@ -98,116 +83,73 @@ apt-get update
 apt-get -y upgrade
 apt-get -y dist-upgrade
 apt-get -y install software-properties-common
-add-apt-repository -y ppa:ubuntu-toolchain-r/test
-add-apt-repository -y ppa:cybermax-dexter/mingw-w64-backport
+dpkg --add-architecture i386
 apt-get update
-apt-get -y build-dep wine-development libsdl2 libvulkan1 python3
-apt-get -y install ccache gcc-11 g++-11 wget git gcc-mingw-w64 g++-mingw-w64 ninja-build
-apt-get -y install libxpresent-dev libjxr-dev libusb-1.0-0-dev libgcrypt20-dev libpulse-dev libudev-dev libsane-dev libv4l-dev libkrb5-dev libgphoto2-dev liblcms2-dev libcapi20-dev
-apt-get -y install libjpeg62-dev samba-dev
-apt-get -y install libpcsclite-dev libcups2-dev
-apt-get -y install python3-pip libxcb-xkb-dev libbz2-dev texinfo curl
-apt-get -y purge libvulkan-dev libvulkan1 libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev libpcap0.8 --purge --autoremove
-apt-get -y purge *gstreamer* --purge --autoremove
-apt-get -y clean
-apt-get -y autoclean
+
+## Installing Wine dependencies needed to compile...
+apt-get -y install wget git libunwind-dev autoconf bison cmake ccache debhelper desktop-file-utils docbook-to-man docbook-utils docbook-xsl flex fontforge gawk gettext libacl1-dev libasound2-dev libcapi20-dev libcups2-dev libdbus-1-dev libgif-dev libglu1-mesa-dev libgphoto2-dev libgsm1-dev libgtk-3-dev libkrb5-dev libxi-dev liblcms2-dev libldap2-dev libmpg123-dev libncurses5-dev libopenal-dev libosmesa6-dev libpcap-dev libpulse-dev libsane-dev libssl-dev libtiff5-dev libudev-dev libv4l-dev libva-dev libxslt1-dev libxt-dev ocl-icd-opencl-dev oss4-dev prelink sharutils unixodbc-dev valgrind schedtool libfreetype6-dev xserver-xorg-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gcc-multilib g++-multilib curl fonttools libsdl2-dev python3-tk libvulkan1 libc6-dev linux-libc-dev libkdb5-* libppl14 libcolord2 libvulkan-dev libgnutls28-dev libpng-dev libkadm5clnt-mit* libkadm5srv-mit* libavcodec-dev libavutil-dev libswresample-dev libavcodec58 libswresample3 libavutil56 libvkd3d-dev libxinerama-dev libxcursor-dev libxrandr-dev libxcomposite-dev mingw-w64 glslang-dev glslang-tools meson wget python3-pefile rustc cargo python3-ldb samba-libs samba-dev libgcrypt20-dev libusb-1.0-0-dev yasm jq
+apt-get -y install libunwind-dev:i386 xserver-xorg-dev:i386 libfreetype6-dev:i386 libfontconfig1-dev:i386 libglu1-mesa-dev:i386 libglu1-mesa:i386 libgl1-mesa-dev:i386 libgl1:i386 libosmesa6-dev:i386 libosmesa6:i386 mesa-common-dev:i386 libegl1-mesa-dev:i386 libegl-dev:i386 libgl-dev:i386 libglx-dev:i386 libglx0:i386 libllvm12:i386 libgles-dev:i386 libglvnd-dev:i386 libgles2-mesa-dev:i386 libvulkan-dev:i386 libvulkan1:i386 libpulse-dev:i386 libopenal-dev:i386 libncurses-dev:i386 libvkd3d-dev:i386 libgnutls28-dev:i386 libtiff-dev:i386 libldap-dev:i386 libcapi20-dev:i386 libpcap-dev:i386 libxml2-dev:i386 libmpg123-dev:i386 libgphoto2-dev:i386 libsane-dev:i386 libcupsimage2-dev:i386 libgsm1-dev:i386 libxslt1-dev:i386 libv4l-dev:i386 libudev-dev:i386 libxi-dev:i386 liblcms2-dev:i386 libibus-1.0-dev:i386 libsdl2-dev:i386 ocl-icd-opencl-dev:i386 libxinerama-dev:i386 libxcursor-dev:i386 libxrandr-dev:i386 libxcomposite-dev:i386 libavcodec58:i386 libswresample3:i386 libavutil56:i386 valgrind:i386 libgcrypt20-dev:i386 samba-libs:i386 python3-ldb:i386 python3-talloc:i386 python3:i386 samba-dev:i386 libusb-1.0-0-dev:i386 libgstreamer1.0-dev:i386 libgstreamer-plugins-base1.0-dev:i386
+apt-get -y install wayland-protocols libwayland-egl-backend-dev libwayland-egl-backend-dev:i386 libwayland-dev  
+apt-get -y install python3-pip libxcb-xkb-dev libxcb-xkb-dev:i386
+pip3 install meson
+pip3 install ninja
 export PATH="/usr/local/bin:\${PATH}"
-mkdir /opt/build_libs
-cd /opt/build_libs
-wget -O sdl.tar.gz https://www.libsdl.org/release/SDL2-${sdl2_version}.tar.gz
-wget -O faudio.tar.gz https://github.com/FNA-XNA/FAudio/archive/${faudio_version}.tar.gz
-wget -O vulkan-loader.tar.gz https://github.com/KhronosGroup/Vulkan-Loader/archive/v${vulkan_loader_version}.tar.gz
-wget -O vulkan-headers.tar.gz https://github.com/KhronosGroup/Vulkan-Headers/archive/v${vulkan_headers_version}.tar.gz
-wget -O spirv-headers.tar.gz https://github.com/KhronosGroup/SPIRV-Headers/archive/${spirv_headers_version}.tar.gz
-wget -O libpcap.tar.gz https://www.tcpdump.org/release/libpcap-${libpcap_version}.tar.gz
-wget -O libxkbcommon.tar.xz https://xkbcommon.org/download/libxkbcommon-${libxkbcommon_version}.tar.xz
-wget -O python3.tar.gz https://www.python.org/ftp/python/${python3_version}/Python-${python3_version}.tgz
-wget -O meson.tar.gz https://github.com/mesonbuild/meson/releases/download/${meson_version}/meson-${meson_version}.tar.gz
-wget -O cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}.tar.gz
-wget -O ccache.tar.gz https://github.com/ccache/ccache/releases/download/v${ccache_version}/ccache-${ccache_version}.tar.gz
-wget -O libglvnd.tar.gz https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v${libglvnd_version}/libglvnd-v${libglvnd_version}.tar.gz
 wget -O /usr/include/linux/ntsync.h https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.13/main/include/uapi/linux/ntsync.h
 wget -O /usr/include/linux/userfaultfd.h https://raw.githubusercontent.com/zen-kernel/zen-kernel/refs/heads/6.13/main/include/uapi/linux/userfaultfd.h
-if [ -d /usr/lib/i386-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable_4.0.3~bionic_i386.deb; fi
-if [ -d /usr/lib/x86_64-linux-gnu ]; then wget -O wine.deb https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-amd64/wine-stable_4.0.3~bionic_amd64.deb; fi
-git clone https://gitlab.freedesktop.org/gstreamer/gstreamer.git -b 1.22
-wget https://raw.githubusercontent.com/Kron4ek/Wine-Builds/refs/heads/master/mingw-w64-build
-tar xf sdl.tar.gz
-tar xf faudio.tar.gz
-tar xf vulkan-loader.tar.gz
-tar xf vulkan-headers.tar.gz
-tar xf spirv-headers.tar.gz
-tar xf libpcap.tar.gz
-tar xf libxkbcommon.tar.xz
-tar xf python3.tar.gz
-tar xf cmake.tar.gz
-tar xf ccache.tar.gz
-tar xf libglvnd.tar.gz
-tar xf meson.tar.gz -C /usr/local
-ln -s /usr/local/meson-${meson_version}/meson.py /usr/local/bin/meson
-bash mingw-w64-build x86_64
-bash mingw-w64-build i686
-export CC=gcc-11
-export CXX=g++-11
-export CFLAGS="-O2"
-export CXXFLAGS="-O2"
-cd cmake-${cmake_version}
-./bootstrap --parallel=$(nproc)
-make -j$(nproc) install
-cd ../ && mkdir build && cd build
-cmake ../ccache-${ccache_version} && make -j$(nproc) && make install
-cd ../ && rm -r build && mkdir build && cd build
-cmake ../SDL2-${sdl2_version} && make -j$(nproc) && make install
-cd ../ && rm -r build && mkdir build && cd build
-cmake ../FAudio-${faudio_version} && make -j$(nproc) && make install
-cd ../ && rm -r build && mkdir build && cd build
-cmake ../Vulkan-Headers-${vulkan_headers_version} && make -j$(nproc) && make install
-cd ../ && rm -r build && mkdir build && cd build
-cmake ../Vulkan-Loader-${vulkan_loader_version}
-make -j$(nproc)
-make install
-cd ../ && rm -r build && mkdir build && cd build
-cmake ../SPIRV-Headers-${spirv_headers_version} && make -j$(nproc) && make install
-cd ../ && dpkg -x wine.deb .
-cp opt/wine-stable/bin/widl /usr/bin
-rm -r build && mkdir build && cd build
-../libpcap-${libpcap_version}/configure && make -j$(nproc) install
-cd ../ && rm -r build && mkdir build && cd build
-../Python-${python3_version}/configure --enable-optimizations
-make -j$(nproc)
-make -j$(nproc) install
-pip3 install setuptools
-cd ../libxkbcommon-${libxkbcommon_version}
+
+# Compiling libxkbcommon from source (not in Ubuntu 20.04 repos)...
+wget -O libxkbcommon.tar.xz https://xkbcommon.org/download/libxkbcommon-${libxkbcommon_version}.tar.xz
+tar -xf libxkbcommon.tar.xz
+cd libxkbcommon-${libxkbcommon_version}
+rm -rf build
+rm -rf build_i386
+
+# 64bit libxkbcommon...
 meson setup build -Denable-docs=false
-meson compile -C build
-meson install -C build
-cd ../gstreamer
-meson setup build
 ninja -C build
 ninja -C build install
-cd ../libglvnd-v${libglvnd_version}
-meson setup build
-meson compile -C build
-meson install -C build
-cd /opt && rm -r /opt/build_libs
+rm -rf build
+
+# 32bit libxkbcommon...
+echo "[binaries]
+c = '/usr/bin/gcc'
+cpp = '/usr/bin/g++'
+ar = 'ar'
+strip = 'strip'
+pkgconfig = 'pkg-config'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'x86'
+cpu = 'i386'
+endian = 'little'
+" | tee /opt/build32-conf.txt
+
+export PKG_CONFIG_PATH="/usr/lib/i386-linux-gnu/pkgconfig"
+export LD_LIBRARY_PATH="/usr/lib/i386-linux-gnu"
+CFLAGS="-m32" LDFLAGS="-m32" meson setup build_i386 -Denable-docs=false --prefix=/usr/local/i386 --libdir=lib/i386-linux-gnu \
+--native-file /opt/build32-conf.txt 
+ninja -C build_i386
+ninja -C build_i386 install
+rm /opt/build32-conf.txt 
+cd ..
+rm libxkbcommon.tar.xz
+
+# Cleaning...
+apt-get -y clean
+apt-get -y autoclean
 EOF
 
 	chmod +x "${MAINDIR}"/prepare_chroot.sh
-	cp "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X32}"/opt
 	mv "${MAINDIR}"/prepare_chroot.sh "${CHROOT_X64}"/opt
 }
 
 mkdir -p "${MAINDIR}"
 
 debootstrap --arch amd64 $CHROOT_DISTRO "${CHROOT_X64}" $CHROOT_MIRROR
-debootstrap --arch i386 $CHROOT_DISTRO "${CHROOT_X32}" $CHROOT_MIRROR
 
 create_build_scripts
-prepare_chroot 32
-prepare_chroot 64
+prepare_chroot
+rm "${CHROOT_PATH}"/opt/prepare_chroot.sh
 
-rm "${CHROOT_X64}"/opt/prepare_chroot.sh
-rm "${CHROOT_X32}"/opt/prepare_chroot.sh
-
-clear
 echo "Done"
