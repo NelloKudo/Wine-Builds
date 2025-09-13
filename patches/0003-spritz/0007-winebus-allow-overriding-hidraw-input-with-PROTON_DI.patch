@@ -1,0 +1,94 @@
+From b1bc214de4af5906cbf1a5457eff57d593b03fb9 Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Sat, 13 Sep 2025 03:06:26 +0200
+Subject: [PATCH] winebus: allow overriding hidraw/input with
+ PROTON_DISABLE_HIDRAW etc.
+
+Attempt at providing the same behavior as Proton where both PROTON_DISABLE_HIDRAW
+and PROTON_PREFER_SDL disable hidraw.
+
+Also introduced a PROTON_DISABLE_INPUT to set 'DisableInput' to 1, has been done in
+the latest wine-tkg releases and might prove helpful to someone.
+---
+ dlls/winebus.sys/main.c      | 26 ++++++++++++++++++++++++++
+ programs/services/services.c | 25 ++++++++++++++++++-------
+ 2 files changed, 44 insertions(+), 7 deletions(-)
+
+diff --git a/dlls/winebus.sys/main.c b/dlls/winebus.sys/main.c
+index fc4ef81985f..d6c24fb774a 100644
+--- a/dlls/winebus.sys/main.c
++++ b/dlls/winebus.sys/main.c
+@@ -494,6 +494,32 @@ static DWORD check_bus_option(const WCHAR *option, DWORD default_value)
+     KEY_VALUE_PARTIAL_INFORMATION *info = (KEY_VALUE_PARTIAL_INFORMATION *)buffer;
+     UNICODE_STRING str;
+     DWORD size;
++    WCHAR value[1024];
++    SIZE_T len;
++    const char *env;
++
++    /* Allow disabling hidraw/input using Proton's known env. vars, besides registry. */
++    if (!wcsicmp(option, L"DisableHidraw"))
++    {
++        env = getenv("PROTON_DISABLE_HIDRAW");
++        if (!env) env = getenv("PROTON_PREFER_SDL");
++
++        if (env && atoi(env))
++        {
++            FIXME("Toggle detected, disabling hidraw..\n");
++            return (DWORD)1;
++        }
++    }
++    else if (!wcsicmp(option, L"DisableInput"))
++    {
++        env = getenv("PROTON_DISABLE_INPUT");
++
++        if (env && atoi(env))
++        {
++            FIXME("Toggle detected, disabling input..\n");
++            return (DWORD)1;
++        }
++    }
+ 
+     /* @@ Wine registry key: HKLM\System\CurrentControlSet\Services\WineBus */
+     RtlInitUnicodeString(&str, option);
+diff --git a/programs/services/services.c b/programs/services/services.c
+index dff3cd60040..49f67a7bc48 100644
+--- a/programs/services/services.c
++++ b/programs/services/services.c
+@@ -1030,15 +1030,26 @@ found:
+ 
+     if (!environment && OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_DUPLICATE, &token))
+     {
+-        WCHAR val[16];
+-        CreateEnvironmentBlock(&environment, token, FALSE);
+-        if (GetEnvironmentVariableW( L"WINEBOOTSTRAPMODE", val, ARRAY_SIZE(val) ))
++        static const WCHAR *preserve[] =
+         {
+-            UNICODE_STRING name = RTL_CONSTANT_STRING(L"WINEBOOTSTRAPMODE");
+-            UNICODE_STRING value;
++            L"WINEBOOTSTRAPMODE",
++            L"WINEBUSCONFIG",
++            L"PROTON_DISABLE_HIDRAW",
++            L"PROTON_PREFER_SDL",
++            L"PROTON_DISABLE_INPUT"
++        };
++        WCHAR val[1024];
+ 
+-            RtlInitUnicodeString( &value, val );
+-            RtlSetEnvironmentVariable( (WCHAR **)&environment, &name, &value );
++        CreateEnvironmentBlock(&environment, token, FALSE);
++        for (size_t i = 0; i < ARRAY_SIZE(preserve); i++)
++        {
++            if (GetEnvironmentVariableW( preserve[i], val, ARRAY_SIZE(val) ))
++            {
++                UNICODE_STRING value, name;
++                RtlInitUnicodeString( &name, preserve[i] );
++                RtlInitUnicodeString( &value, val );
++                RtlSetEnvironmentVariable( (WCHAR **)&environment, &name, &value );
++            }
+         }
+         CloseHandle(token);
+     }
+-- 
+2.51.0
+
