@@ -1,6 +1,6 @@
-# Spritz-Wine-TkG
+# Spritz-Wine-CachyOS
 
-`Spritz-Wine-TkG` is a custom Wine build aimed at making playing certain
+`Spritz-Wine-CachyOS` is a custom Wine build aimed at making playing certain
 anime games easier, without missing any of Wine's latest additions.
 
 ## Download
@@ -10,11 +10,10 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
 ## Features:
 
 - Fixes various issues with **certain anime games**, from launch issues to hanging on exit
-- Rebased to **latest wine-staging**
+- Rebased to **latest wine-cachyos**
 - Bundles all **esync/fsync/ntsync** in the same build, with latter used by default if possible
-- Includes many of Wine-TkG's fixes
-- Backported and reworked many patches from Proton, mostly aiming controllers
 - Includes some QoL fixes for dropping inputs, random crashes and alt-tabbing.
+- Includes some backports from upstream Wine
 
 ## Useful environmental variables
 
@@ -27,11 +26,11 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
   - `WINE_DISABLE_DISCONNECT=1`: disables the disconnecting trick when enabled by default
   - `WINE_ENABLE_DISCONNECT=1`: enables the disconnecting trick
   - `WINE_ENABLE_STEAM_STUB=1`: launches the executable using the `steam.exe` stub in the builds
+  - `WINE_ENABLE_USE_TAKE_FOCUS=1`: re-enables UseTakeFocus, to use if having issues with tabbing
 
-- Proton imported patches:
-  - `PROTON_PREFER_SDL=1`: uses SDL instead of hidraw, disabling it (already default)
-  - `PROTON_DISABLE_HIDRAW=1`: disables hidraw (already default)
-  - `PROTON_ENABLE_HIDRAW=1`: enables hidraw, fixes PlayStation glyphs not showing in some games
+- Proton controllers:
+  - `PROTON_DISABLE_HIDRAW=1`: disables hidraw, might fix issues with controllers on Xbox
+  - `PROTON_ENABLE_HIDRAW=1`: enables hidraw, fixes PlayStation glyphs not showing in some games (default)
 
 ## Builds description
 
