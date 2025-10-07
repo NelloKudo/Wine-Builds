@@ -17,26 +17,26 @@ Error() {
 
 _configuration() {
     # Toggle to enable/disable Wine-Staging.
-    USE_STAGING="${USE_STAGING:-true}"
+    USE_STAGING="${USE_STAGING:-false}"
     STAGING_ARGS="${STAGING_ARGS:-"--all"}"
 
     # Toggle to enable/disable Wine-tkg.
     USE_TKG="${USE_TKG:-false}"
 
     # Toggle to enable/disable Wine-CachyOS.
-    USE_CACHY="${USE_CACHY:-false}"
+    USE_CACHY="${USE_CACHY:-true}"
 
     # Toggle to enable/disable Wine-Valve.
     USE_VALVE="${USE_VALVE:-false}"
 
     # Set your custom build name here:
-    BUILD_NAME="${BUILD_NAME:-spritz-wine-tkg}"
+    BUILD_NAME="${BUILD_NAME:-spritz-wine-cachyos}"
 
     # Wine version settings
     WINE_VERSION=''
     STAGING_VERSION=''
     WINE_BRANCH="${WINE_BRANCH:-}"
-    RELEASE_VERSION='4'
+    RELEASE_VERSION='1'
     PATCHSET=''
 
     # Build configuration
@@ -127,6 +127,11 @@ _custompatcher() {
 
     ## Clean up .orig files if patches succeeded
     find "${BUILD_DIR}/wine"/ -iregex ".*orig" -execdir rm '{''}' '+' || true
+
+    ## Restore Wine original logo
+    rm "${BUILD_DIR}/wine/dlls/user32/resources/oic_winlogo.ico"
+    rm "${BUILD_DIR}/wine/dlls/user32/resources/oic_winlogo.svg"
+    cp -rf ${WINE_ROOT}/assets/* "${BUILD_DIR}/wine/dlls/user32/resources"
 }
 
 build_wine() {
