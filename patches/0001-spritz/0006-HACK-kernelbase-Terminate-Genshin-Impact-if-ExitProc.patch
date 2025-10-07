@@ -1,0 +1,65 @@
+From 9cdd2f06ce72244293d89c90cd4a9cbfde04eccb Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Fri, 13 Jun 2025 21:34:02 +0200
+Subject: [PATCH 6/9] HACK: kernelbase: Terminate Genshin Impact if ExitProcess
+ is called
+
+Genshin won't close properly calling AppPolicyProcessTerminationMethod_ExitProcess:
+just terminate the process if that happens, instead.
+---
+ dlls/kernelbase/main.c | 32 ++++++++++++++++++++++++++++++--
+ 1 file changed, 30 insertions(+), 2 deletions(-)
+
+diff --git a/dlls/kernelbase/main.c b/dlls/kernelbase/main.c
+index 60173ba6513..981a1f33016 100644
+--- a/dlls/kernelbase/main.c
++++ b/dlls/kernelbase/main.c
+@@ -95,6 +95,24 @@ LONG WINAPI AppPolicyGetMediaFoundationCodecLoading(HANDLE token, AppPolicyMedia
+     return ERROR_SUCCESS;
+ }
+ 
++static BOOL is_genshin(void)
++{
++    static volatile char cache = -1;
++    BOOL ret = cache;
++    if (ret == -1)
++    {
++        const WCHAR *p, *name = NtCurrentTeb()->Peb->ProcessParameters->ImagePathName.Buffer;
++        if ((p = wcsrchr(name, '/')))
++            name = p + 1;
++        if ((p = wcsrchr(name, '\\')))
++            name = p + 1;
++        ret = (!wcsicmp(name, L"GenshinImpact.exe") ||
++               !wcsicmp(name, L"YuanShen.exe"));
++        cache = ret;
++    }
++    return ret;
++}
++
+ /***********************************************************************
+  *          AppPolicyGetProcessTerminationMethod (KERNELBASE.@)
+  */
+@@ -102,8 +120,18 @@ LONG WINAPI AppPolicyGetProcessTerminationMethod(HANDLE token, AppPolicyProcessT
+ {
+     FIXME("%p, %p\n", token, policy);
+ 
+-    if(policy)
+-        *policy = AppPolicyProcessTerminationMethod_ExitProcess;
++    if (policy)
++    {
++        if (is_genshin())
++        {
++            FIXME("Genshin Impact detected, forcefully closing..\n");
++            *policy = AppPolicyProcessTerminationMethod_TerminateProcess;
++        }
++        else
++        {
++            *policy = AppPolicyProcessTerminationMethod_ExitProcess;
++        }
++    }
+ 
+     return ERROR_SUCCESS;
+ }
+-- 
+2.51.0
+

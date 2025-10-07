@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'wine-tkg-aagl*'
+      - 'wine-*'
 
 jobs:
   build:

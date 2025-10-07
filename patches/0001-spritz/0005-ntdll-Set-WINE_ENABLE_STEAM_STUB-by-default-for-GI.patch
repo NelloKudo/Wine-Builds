@@ -1,0 +1,27 @@
+From 3e9751e00c2fb2c7f00a1b9209d8d945b32e39d4 Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Tue, 7 Oct 2025 13:06:25 +0200
+Subject: [PATCH 5/9] ntdll: Set WINE_ENABLE_STEAM_STUB by default for GI
+
+---
+ dlls/ntdll/unix/loader.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
+index 389f85b34e7..d703fdafa71 100644
+--- a/dlls/ntdll/unix/loader.c
++++ b/dlls/ntdll/unix/loader.c
+@@ -1989,6 +1989,10 @@ static void hacks_init(void)
+ {
+     const char *sgi = getenv( "SteamGameId" );
+     const char *env_str;
++
++    if (main_argc > 1 && (strstr(main_argv[1], "GenshinImpact.exe") || strstr(main_argv[1], "YuanShen.exe") || strstr(main_argv[1], "fpsunlock.exe")))
++        setenv( "WINE_ENABLE_STEAM_STUB", "1", 0 );
++
+     if ((env_str = getenv("WINE_RAM_REPORTING_BIAS")))
+     {
+         ram_reporting_bias = atoll(env_str) * 1024 * 1024;
+-- 
+2.51.0
+
