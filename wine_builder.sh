@@ -36,7 +36,7 @@ _configuration() {
     WINE_VERSION=''
     STAGING_VERSION=''
     WINE_BRANCH="${WINE_BRANCH:-}"
-    RELEASE_VERSION='1'
+    RELEASE_VERSION='2'
     PATCHSET=''
 
     # Build configuration
@@ -291,6 +291,7 @@ build_setup() {
         --without-v4l2
         --without-netapi
         --disable-msv1_0
+        --disable-lsteamclient
     )
 
     if [ "${DEBUG}" = "true" ]; then
