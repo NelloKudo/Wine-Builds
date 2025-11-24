@@ -1,4 +1,4 @@
-From d50a50b777337ddf29e4fbed8c14a0ff5b655f7e Mon Sep 17 00:00:00 2001
+From c4342af965b293d5a89f3cd141452c685359c568 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Tue, 7 Oct 2025 12:54:50 +0200
 Subject: [PATCH 1/9] loader: change winediag logging to Spritz
@@ -8,10 +8,10 @@ Subject: [PATCH 1/9] loader: change winediag logging to Spritz
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
-index cfb106a7165..0fd9581348b 100644
+index 436d69ccac7..2496832fac4 100644
 --- a/dlls/ntdll/loader.c
 +++ b/dlls/ntdll/loader.c
-@@ -4770,8 +4770,8 @@ void loader_init( CONTEXT *context, void **entry )
+@@ -4717,8 +4717,8 @@ void loader_init( CONTEXT *context, void **entry )
              }
              if (FIXME_ON(winediag))
              {
@@ -23,5 +23,5 @@ index cfb106a7165..0fd9581348b 100644
          }
          NtClose( startup_event );
 -- 
-2.51.0
+2.52.0
 

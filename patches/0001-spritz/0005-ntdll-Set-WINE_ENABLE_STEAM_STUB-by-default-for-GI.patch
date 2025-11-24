@@ -1,4 +1,4 @@
-From 3e9751e00c2fb2c7f00a1b9209d8d945b32e39d4 Mon Sep 17 00:00:00 2001
+From 59f21c603f475ab5a906f59bcfc07219ea3a1e47 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Tue, 7 Oct 2025 13:06:25 +0200
 Subject: [PATCH 5/9] ntdll: Set WINE_ENABLE_STEAM_STUB by default for GI
@@ -8,10 +8,10 @@ Subject: [PATCH 5/9] ntdll: Set WINE_ENABLE_STEAM_STUB by default for GI
  1 file changed, 4 insertions(+)
 
 diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
-index 389f85b34e7..d703fdafa71 100644
+index 7a376e74224..2048a63417b 100644
 --- a/dlls/ntdll/unix/loader.c
 +++ b/dlls/ntdll/unix/loader.c
-@@ -1989,6 +1989,10 @@ static void hacks_init(void)
+@@ -2213,6 +2213,10 @@ static void hacks_init(void)
  {
      const char *sgi = getenv( "SteamGameId" );
      const char *env_str;
@@ -23,5 +23,5 @@ index 389f85b34e7..d703fdafa71 100644
      {
          ram_reporting_bias = atoll(env_str) * 1024 * 1024;
 -- 
-2.51.0
+2.52.0
 

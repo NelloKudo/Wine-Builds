@@ -1,4 +1,4 @@
-From 9cdd2f06ce72244293d89c90cd4a9cbfde04eccb Mon Sep 17 00:00:00 2001
+From 90b4f9a7282dbfffa215085e5f5c0d9c353d9d78 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Fri, 13 Jun 2025 21:34:02 +0200
 Subject: [PATCH 6/9] HACK: kernelbase: Terminate Genshin Impact if ExitProcess
@@ -61,5 +61,5 @@ index 60173ba6513..981a1f33016 100644
      return ERROR_SUCCESS;
  }
 -- 
-2.51.0
+2.52.0
 

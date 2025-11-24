@@ -1,0 +1,30 @@
+From d3d5399923b53baf638f487a03fa1a4435a053a2 Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Thu, 17 Jul 2025 15:09:56 +0200
+Subject: [PATCH 7/9] HACK: winex11: make WM focus window with
+ WINE_USE_TAKE_FOCUS
+
+Fixes issues in Unity games like GI/ZZZ where the game drops inputs after alt-tab.
+---
+ dlls/winex11.drv/x11drv_main.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/dlls/winex11.drv/x11drv_main.c b/dlls/winex11.drv/x11drv_main.c
+index 69656ec42bb..e6762fcb15d 100644
+--- a/dlls/winex11.drv/x11drv_main.c
++++ b/dlls/winex11.drv/x11drv_main.c
+@@ -807,6 +807,11 @@ static NTSTATUS x11drv_init( void *arg )
+ 
+     setup_options();
+ 
++    // HACK: Allow overriding use_take_focus with env. var, besides regedit.
++    // Useful for Unity games losing inputs after alt-tab.
++    if (getenv("WINE_USE_TAKE_FOCUS") && atoi(getenv("WINE_USE_TAKE_FOCUS")))
++        use_take_focus = FALSE;
++
+     /* Open display */
+ 
+     if (!XInitThreads()) ERR( "XInitThreads failed, trouble ahead\n" );
+-- 
+2.52.0
+

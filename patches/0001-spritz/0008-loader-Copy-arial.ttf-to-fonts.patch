@@ -1,4 +1,4 @@
-From 6d8a0189345d9cab1137e7e45df28eb09bca91fe Mon Sep 17 00:00:00 2001
+From b0de78f26cf58d3e9fc553f96d95c6c808fb71ad Mon Sep 17 00:00:00 2001
 From: mkrsym1 <mkrsym1@gmail.com>
 Date: Mon, 8 Sep 2025 21:05:27 +0200
 Subject: [PATCH 8/9] loader: Copy arial.ttf to fonts
@@ -8,7 +8,7 @@ Subject: [PATCH 8/9] loader: Copy arial.ttf to fonts
  1 file changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/loader/wine.inf.in b/loader/wine.inf.in
-index 5950fc8ffda..3ff9241c02e 100644
+index caa7afb55d9..d286955ef2b 100644
 --- a/loader/wine.inf.in
 +++ b/loader/wine.inf.in
 @@ -54,7 +54,7 @@ AddService=MountMgr,0x800,MountMgrService
@@ -20,7 +20,7 @@ index 5950fc8ffda..3ff9241c02e 100644
  AddReg=\
      Classes,\
      ContentIndex,\
-@@ -169,7 +169,7 @@ AddReg=\
+@@ -176,7 +176,7 @@ AddReg=\
  [Wow64Install.ntx86]
  RegisterDlls=RegisterDllsSection
  WineFakeDlls=FakeDllsWin32,FakeDllsWow64
@@ -29,7 +29,7 @@ index 5950fc8ffda..3ff9241c02e 100644
  AddReg=\
      CurrentVersion,\
      CurrentVersionWow64.ntx86,\
-@@ -3098,9 +3098,13 @@ normnfkd.nls
+@@ -3108,9 +3108,13 @@ normnfkd.nls
  [SortFiles]
  sortdefault.nls
  
@@ -43,14 +43,14 @@ index 5950fc8ffda..3ff9241c02e 100644
  
  [DestinationDirs]
  ColorFiles = 23
-@@ -3108,6 +3112,7 @@ EtcFiles  = 12,etc
+@@ -3118,6 +3122,7 @@ EtcFiles  = 12,etc
  InfFiles  = 17
  NlsFiles  = 11
  SortFiles = 10,globalization\sorting
 +FontFiles = 20
  
- [NVIDIANGX]
- HKLM,Software\NVIDIA Corporation\Global\NGXCore,"FullPath",,"C:\Windows\System32"
+ [SteamClient]
+ HKCU,Software\Valve\Steam,"SteamPath",,"%16422%\Steam"
 -- 
-2.51.0
+2.52.0
 

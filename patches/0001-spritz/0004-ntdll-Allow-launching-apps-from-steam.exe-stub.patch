@@ -1,7 +1,7 @@
-From 5ab29dfa545d0bcc919e71116aa147f4300a4ed7 Mon Sep 17 00:00:00 2001
+From 4a555a6c833fad6b39459e2af231bede281850b9 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Tue, 7 Oct 2025 13:33:38 +0200
-Subject: [PATCH] ntdll: Allow launching apps from steam.exe stub
+Subject: [PATCH 4/9] ntdll: Allow launching apps from steam.exe stub
 
 Some games need to be launched from Proton's stub steam.exe to allow
 being launched on Linux and related systems: this allows doing so without
@@ -13,10 +13,10 @@ any Proton script, but straight up from Wine.
  3 files changed, 67 insertions(+), 7 deletions(-)
 
 diff --git a/dlls/ntdll/unix/env.c b/dlls/ntdll/unix/env.c
-index 2cb8c59f6f3..37a37386b18 100644
+index cc964be216f..4293ab03bd3 100644
 --- a/dlls/ntdll/unix/env.c
 +++ b/dlls/ntdll/unix/env.c
-@@ -1959,6 +1959,24 @@ static void init_peb( RTL_USER_PROCESS_PARAMETERS *params, void *module )
+@@ -1979,6 +1979,24 @@ static void init_peb( RTL_USER_PROCESS_PARAMETERS *params, void *module )
  }
  
  
@@ -41,7 +41,7 @@ index 2cb8c59f6f3..37a37386b18 100644
  /*************************************************************************
   *		build_initial_params
   *
-@@ -1974,6 +1992,7 @@ static RTL_USER_PROCESS_PARAMETERS *build_initial_params( void **module )
+@@ -1994,6 +2012,7 @@ static RTL_USER_PROCESS_PARAMETERS *build_initial_params( void **module )
      WCHAR *env = get_initial_environment( &env_pos, &env_size );
      WCHAR *curdir = get_initial_directory();
      NTSTATUS status;
@@ -49,7 +49,7 @@ index 2cb8c59f6f3..37a37386b18 100644
  
      if (NtCurrentTeb64()) NtCurrentTeb64()->TlsSlots[WOW64_TLS_FILESYSREDIR] = TRUE;
  
-@@ -2010,18 +2029,32 @@ static RTL_USER_PROCESS_PARAMETERS *build_initial_params( void **module )
+@@ -2030,18 +2049,32 @@ static RTL_USER_PROCESS_PARAMETERS *build_initial_params( void **module )
          }
      }
  
@@ -90,10 +90,10 @@ index 2cb8c59f6f3..37a37386b18 100644
  
      main_wargv = build_wargv( get_dos_path( image ));
 diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
-index b70c24684ef..6bed602ab33 100644
+index 31eeffb5690..7a376e74224 100644
 --- a/dlls/ntdll/unix/loader.c
 +++ b/dlls/ntdll/unix/loader.c
-@@ -1643,6 +1643,32 @@ NTSTATUS load_start_exe( WCHAR **image, void **module )
+@@ -1868,6 +1868,32 @@ NTSTATUS load_start_exe( WCHAR **image, void **module )
      return status;
  }
  
@@ -114,7 +114,7 @@ index b70c24684ef..6bed602ab33 100644
 +    wcscpy( *image, get_machine_wow64_dir( current_machine ));
 +    wcscat( *image, startW );
 +    init_unicode_string( &nt_name, *image );
-+    status = find_builtin_dll( &nt_name, module, &size, &main_image_info, 0, 0, current_machine, 0, FALSE );
++    status = find_builtin_dll( &nt_name, module, &size, &main_image_info, 0, 0, current_machine, 0, FALSE, 0 );
 +    if (!NT_SUCCESS(status))
 +    {
 +        MESSAGE( "wine: failed to load steam.exe: %x\n", status );
@@ -127,10 +127,10 @@ index b70c24684ef..6bed602ab33 100644
  /***********************************************************************
   *           load_ntdll_functions
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index c60eb4c4e0f..8ba0b93d827 100644
+index e8148552b75..9a5173ee45c 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
-@@ -221,6 +221,7 @@ extern BOOL is_builtin_path( const UNICODE_STRING *path, WORD *machine );
+@@ -222,6 +222,7 @@ extern BOOL is_builtin_path( const UNICODE_STRING *path, WORD *machine );
  extern NTSTATUS load_main_exe( const WCHAR *name, const char *unix_name, const WCHAR *curdir,
                                 USHORT load_machine, WCHAR **image, void **module );
  extern NTSTATUS load_start_exe( WCHAR **image, void **module );
@@ -139,5 +139,5 @@ index c60eb4c4e0f..8ba0b93d827 100644
  extern void start_server( BOOL debug );
  
 -- 
-2.51.0
+2.52.0
 
