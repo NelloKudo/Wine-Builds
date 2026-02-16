@@ -1,7 +1,7 @@
-From 0d655e80b6a86e29a5ed3e6fd983da2f4bb20189 Mon Sep 17 00:00:00 2001
+From 84f2a6558439a150fb59b6add31383ec3448215d Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Thu, 17 Jul 2025 15:09:56 +0200
-Subject: [PATCH 6/9] HACK: winex11: make WM focus window with
+Subject: [PATCH 06/15] HACK: winex11: make WM focus window with
  WINE_USE_TAKE_FOCUS
 
 Fixes issues in Unity games like GI/ZZZ where the game drops inputs after alt-tab.
@@ -26,5 +26,5 @@ index 69656ec42bb..e6762fcb15d 100644
  
      if (!XInitThreads()) ERR( "XInitThreads failed, trouble ahead\n" );
 -- 
-2.52.0
+2.53.0
 

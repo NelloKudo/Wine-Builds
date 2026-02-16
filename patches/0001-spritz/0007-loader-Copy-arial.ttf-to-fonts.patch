@@ -1,14 +1,14 @@
-From 4120cf1b2bbfdb20423891e7c556214bbaa7716d Mon Sep 17 00:00:00 2001
+From a4a196682f85a076e38f7c827fa9ef6a1f4ac764 Mon Sep 17 00:00:00 2001
 From: mkrsym1 <mkrsym1@gmail.com>
 Date: Mon, 8 Sep 2025 21:05:27 +0200
-Subject: [PATCH 7/9] loader: Copy arial.ttf to fonts
+Subject: [PATCH 07/15] loader: Copy arial.ttf to fonts
 
 ---
  loader/wine.inf.in | 17 +++++++++++------
  1 file changed, 11 insertions(+), 6 deletions(-)
 
 diff --git a/loader/wine.inf.in b/loader/wine.inf.in
-index e4652b6ff42..cf220763a74 100644
+index 4d0c9795e6e..514bb88dbea 100644
 --- a/loader/wine.inf.in
 +++ b/loader/wine.inf.in
 @@ -54,7 +54,7 @@ AddService=MountMgr,0x800,MountMgrService
@@ -65,7 +65,7 @@ index e4652b6ff42..cf220763a74 100644
  AddReg=\
      CurrentVersion,\
      CurrentVersionWow64.ntarm,\
-@@ -3108,9 +3108,13 @@ normnfkd.nls
+@@ -3109,9 +3109,13 @@ normnfkd.nls
  [SortFiles]
  sortdefault.nls
  
@@ -79,7 +79,7 @@ index e4652b6ff42..cf220763a74 100644
  
  [DestinationDirs]
  ColorFiles = 23
-@@ -3118,6 +3122,7 @@ EtcFiles  = 12,etc
+@@ -3119,6 +3123,7 @@ EtcFiles  = 12,etc
  InfFiles  = 17
  NlsFiles  = 11
  SortFiles = 10,globalization\sorting
@@ -88,5 +88,5 @@ index e4652b6ff42..cf220763a74 100644
  [SteamClient]
  HKCU,Software\Valve\Steam,"SteamPath",,"%16422%\Steam"
 -- 
-2.52.0
+2.53.0
 

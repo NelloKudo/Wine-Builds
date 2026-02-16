@@ -1,0 +1,25 @@
+From 0f658bad044f0c36672c51a29ee9ea471bd51047 Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Mon, 16 Feb 2026 01:01:38 +0100
+Subject: [PATCH 15/15] winex11: Enable GrabFullscreen by default.
+
+---
+ dlls/winex11.drv/x11drv_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dlls/winex11.drv/x11drv_main.c b/dlls/winex11.drv/x11drv_main.c
+index f2f27316c4c..f8d998c376d 100644
+--- a/dlls/winex11.drv/x11drv_main.c
++++ b/dlls/winex11.drv/x11drv_main.c
+@@ -73,7 +73,7 @@ BOOL use_xfixes = FALSE;
+ BOOL use_take_focus = TRUE;
+ BOOL use_primary_selection = FALSE;
+ BOOL use_system_cursors = TRUE;
+-BOOL grab_fullscreen = FALSE;
++BOOL grab_fullscreen = TRUE;
+ int keyboard_layout = -1;
+ BOOL keyboard_scancode_detect = FALSE;
+ BOOL managed_mode = TRUE;
+-- 
+2.53.0
+
