@@ -1,7 +1,7 @@
-From 8e0c571a1d171e84f664553db2517e1af5289881 Mon Sep 17 00:00:00 2001
+From 698cbad08c42f7e5fd5458733b8d259cdeaa4a60 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Tue, 21 Oct 2025 00:20:11 +0200
-Subject: [PATCH 12/17] win32u: Use a private flag to indicate fullscreen
+Subject: [PATCH 12/35] win32u: Use a private flag to indicate fullscreen
  windows.
 
 ---
@@ -31,10 +31,10 @@ index 2c262c81943..1ce460859f3 100644
  {
  }
 diff --git a/dlls/win32u/window.c b/dlls/win32u/window.c
-index 3bd9c3fd487..9981eb6e8b2 100644
+index 96118d7e50e..74ccf0d2333 100644
 --- a/dlls/win32u/window.c
 +++ b/dlls/win32u/window.c
-@@ -2095,6 +2095,12 @@ static void update_children_window_state( HWND hwnd )
+@@ -2109,6 +2109,12 @@ static void update_children_window_state( HWND hwnd )
      free( children );
  }
  
@@ -47,7 +47,7 @@ index 3bd9c3fd487..9981eb6e8b2 100644
  /***********************************************************************
   *           apply_window_pos
   *
-@@ -2106,14 +2112,13 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
+@@ -2120,14 +2126,13 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
      struct window_rects monitor_rects;
      WND *win;
      HWND owner_hint, surface_win = 0, parent = NtUserGetAncestor( hwnd, GA_PARENT );
@@ -63,7 +63,7 @@ index 3bd9c3fd487..9981eb6e8b2 100644
      is_child = parent && parent != NtUserGetDesktopWindow();
  
      if (is_child) monitor_dpi = get_win_monitor_dpi( parent, &raw_dpi );
-@@ -2133,9 +2138,6 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
+@@ -2147,9 +2152,6 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
          valid_rects = NULL;
      }
  
@@ -73,7 +73,7 @@ index 3bd9c3fd487..9981eb6e8b2 100644
      SERVER_START_REQ( set_window_pos )
      {
          req->handle        = wine_server_user_handle( hwnd );
-@@ -2181,6 +2183,14 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
+@@ -2195,6 +2197,14 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
                  new_rects->client.right - new_rects->client.left != old_rects.client.right - old_rects.client.left)
                  win->flags |= WIN_CHILDREN_MOVED;
          }
@@ -88,7 +88,7 @@ index 3bd9c3fd487..9981eb6e8b2 100644
      }
      SERVER_END_REQ;
  
-@@ -2251,7 +2261,7 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
+@@ -2264,7 +2274,7 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
          if (!owner_hint) owner_hint = NtUserWindowFromPoint(new_rects->window.left - 1, new_rects->window.top - 1);
          if (owner_hint) owner_hint = NtUserGetAncestor(owner_hint, GA_ROOT);
  
@@ -124,10 +124,10 @@ index 7eb6c1a6ae9..ad6bcfd1316 100644
  extern void macdrv_DestroyCursorIcon(HCURSOR cursor);
  extern BOOL macdrv_GetCursorPos(LPPOINT pos);
 diff --git a/dlls/winemac.drv/window.c b/dlls/winemac.drv/window.c
-index 5fa90223004..765649f40e4 100644
+index f0ff88330c1..b1ba0829c6f 100644
 --- a/dlls/winemac.drv/window.c
 +++ b/dlls/winemac.drv/window.c
-@@ -1589,9 +1589,10 @@ BOOL macdrv_GetWindowStyleMasks(HWND hwnd, UINT style, UINT ex_style, UINT *styl
+@@ -1598,9 +1598,10 @@ BOOL macdrv_GetWindowStyleMasks(HWND hwnd, UINT style, UINT ex_style, UINT *styl
  /***********************************************************************
   *              WindowPosChanged   (MACDRV.@)
   */
@@ -153,7 +153,7 @@ index cb331df789d..7112b5e6249 100644
  BOOL WAYLAND_WindowPosChanging(HWND hwnd, UINT swp_flags, BOOL shaped, const struct window_rects *rects);
  BOOL WAYLAND_CreateWindowSurface(HWND hwnd, BOOL layered, const RECT *surface_rect, struct window_surface **surface);
 diff --git a/dlls/winewayland.drv/window.c b/dlls/winewayland.drv/window.c
-index 1beeb43a6e2..79a6a584728 100644
+index 396a5cbab40..f945b390001 100644
 --- a/dlls/winewayland.drv/window.c
 +++ b/dlls/winewayland.drv/window.c
 @@ -450,14 +450,14 @@ static HICON get_window_icon(HWND hwnd, UINT type, HICON icon, ICONINFO *ret)
@@ -174,10 +174,10 @@ index 1beeb43a6e2..79a6a584728 100644
      TRACE("hwnd %p new_rects %s after %p flags %08x\n", hwnd, debugstr_window_rects(new_rects), insert_after, swp_flags);
  
 diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
-index d0cc5b3e6d5..a90b9d4769b 100644
+index 585db1d728f..f5a9374cb11 100644
 --- a/dlls/winex11.drv/window.c
 +++ b/dlls/winex11.drv/window.c
-@@ -3190,13 +3190,13 @@ BOOL X11DRV_GetWindowStyleMasks( HWND hwnd, UINT style, UINT ex_style, UINT *sty
+@@ -3258,13 +3258,13 @@ BOOL X11DRV_GetWindowStyleMasks( HWND hwnd, UINT style, UINT ex_style, UINT *sty
  /***********************************************************************
   *		WindowPosChanged   (X11DRV.@)
   */
@@ -207,10 +207,10 @@ index 7c3a3a24612..8b6c759a580 100644
  extern BOOL X11DRV_SystemParametersInfo( UINT action, UINT int_param, void *ptr_param,
                                           UINT flags );
 diff --git a/include/wine/gdi_driver.h b/include/wine/gdi_driver.h
-index abf1b699cab..264b5e48206 100644
+index 90c10204859..3311be9000f 100644
 --- a/include/wine/gdi_driver.h
 +++ b/include/wine/gdi_driver.h
-@@ -352,6 +352,7 @@ struct gdi_device_manager
+@@ -345,6 +345,7 @@ struct gdi_device_manager
  };
  
  #define WINE_DM_UNSUPPORTED 0x80000000
@@ -218,7 +218,7 @@ index abf1b699cab..264b5e48206 100644
  
  struct vulkan_driver_funcs;
  struct opengl_driver_funcs;
-@@ -423,7 +424,7 @@ struct user_driver_funcs
+@@ -416,7 +417,7 @@ struct user_driver_funcs
      BOOL    (*pGetWindowStateUpdates)(HWND,UINT*,UINT*,RECT*,HWND*);
      BOOL    (*pCreateWindowSurface)(HWND,BOOL,const RECT *,struct window_surface**);
      void    (*pMoveWindowBits)(HWND,const struct window_rects *,const struct window_rects *,const RECT *);
@@ -228,5 +228,5 @@ index abf1b699cab..264b5e48206 100644
      BOOL    (*pSystemParametersInfo)(UINT,UINT,void*,UINT);
      /* vulkan support */
 -- 
-2.51.2
+2.53.0
 

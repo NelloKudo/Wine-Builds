@@ -1,4 +1,4 @@
-From dc707b0711184ec8f824c1bb9688073fe871b166 Mon Sep 17 00:00:00 2001
+From eb461c7378f1e6947e4e7a665c68c5efa5f5a6aa Mon Sep 17 00:00:00 2001
 From: Marc-Aurel Zent <mzent@codeweavers.com>
 Date: Wed, 29 Oct 2025 11:05:57 +0100
 Subject: [PATCH 42/44] ntdll: Reimplement NtWaitForSingleObject without
@@ -61,5 +61,5 @@ index eb2ac0413e5..6a587d58fc2 100644
  
  NTSTATUS wait_internal_server( HANDLE handle, BOOLEAN alertable, const LARGE_INTEGER *timeout )
 -- 
-2.51.2
+2.53.0
 

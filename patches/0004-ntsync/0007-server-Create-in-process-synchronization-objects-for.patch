@@ -1,4 +1,4 @@
-From 84e74651b3c5b6ebcf570c4c504165a2f93ddc07 Mon Sep 17 00:00:00 2001
+From 30679fb7e2304360d71890f17a704310214f1336 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Mon, 8 Mar 2021 16:54:34 -0600
 Subject: [PATCH 07/44] server: Create in-process synchronization objects for
@@ -193,5 +193,5 @@ index d76b47bb6c7..3d4d5e6ebab 100644
              wake_up( &screen_buffer->obj, 0 );
          LIST_FOR_EACH_ENTRY( input, &server->console->inputs, struct console_input, entry )
 -- 
-2.51.2
+2.53.0
 

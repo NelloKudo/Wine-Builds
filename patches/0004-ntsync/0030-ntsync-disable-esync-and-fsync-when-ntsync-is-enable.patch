@@ -1,4 +1,4 @@
-From e8fb8c3310a83ac602a0f636d049358c08f91abf Mon Sep 17 00:00:00 2001
+From a3ec5f311b774143414ffcda5c8c560106e15438 Mon Sep 17 00:00:00 2001
 From: Stelios Tsampas <loathingkernel@gmail.com>
 Date: Sun, 15 Dec 2024 01:59:50 +0200
 Subject: [PATCH 30/44] ntsync: disable esync and fsync when ntsync is enabled
@@ -89,5 +89,5 @@ index 1684f7c974f..3e24da73dac 100644
      if (debug_level) fprintf( stderr, "wineserver: starting (pid=%ld)\n", (long) getpid() );
      set_current_time();
 -- 
-2.51.2
+2.53.0
 

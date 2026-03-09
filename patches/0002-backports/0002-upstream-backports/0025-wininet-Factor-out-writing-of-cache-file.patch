@@ -1,0 +1,87 @@
+From 1b956aff21338426a6769825c1f6ad0f3721a520 Mon Sep 17 00:00:00 2001
+From: Torge Matthies <openglfreak@googlemail.com>
+Date: Tue, 3 Mar 2026 16:42:51 +0100
+Subject: [PATCH 25/35] wininet: Factor out writing of cache file.
+
+---
+ dlls/wininet/http.c | 50 +++++++++++++++++++++------------------------
+ 1 file changed, 23 insertions(+), 27 deletions(-)
+
+diff --git a/dlls/wininet/http.c b/dlls/wininet/http.c
+index 962e093b098..57c5512a7e5 100644
+--- a/dlls/wininet/http.c
++++ b/dlls/wininet/http.c
+@@ -2437,6 +2437,27 @@ static void commit_cache_entry(http_request_t *req)
+     free(header);
+ }
+ 
++static void write_cache_file(http_request_t *req, const BYTE *buf, DWORD len)
++{
++    if(!req->hCacheFile) {
++        return;
++    }
++
++    if(len) {
++        BOOL bres;
++        DWORD written;
++
++        bres = WriteFile(req->hCacheFile, buf, len, &written, NULL);
++        if(bres)
++            req->cache_size += written;
++        else
++            FIXME("WriteFile failed: %lu\n", GetLastError());
++    }
++
++    if(req->data_stream->vtbl->end_of_data(req->data_stream, req))
++        commit_cache_entry(req);
++}
++
+ static void create_cache_entry(http_request_t *req)
+ {
+     WCHAR file_name[MAX_PATH+1];
+@@ -2522,18 +2543,7 @@ static void create_cache_entry(http_request_t *req)
+         return;
+     }
+ 
+-    if(req->read_size) {
+-        DWORD written;
+-
+-        b = WriteFile(req->hCacheFile, req->read_buf+req->read_pos, req->read_size, &written, NULL);
+-        if(b)
+-            req->cache_size += written;
+-        else
+-            FIXME("WriteFile failed: %lu\n", GetLastError());
+-
+-        if(req->data_stream->vtbl->end_of_data(req->data_stream, req))
+-            commit_cache_entry(req);
+-    }
++    write_cache_file(req, req->read_buf+req->read_pos, req->read_size);
+ }
+ 
+ /* read some more data into the read buffer (the read section must be held) */
+@@ -2631,21 +2641,7 @@ static DWORD read_http_stream(http_request_t *req, BYTE *buf, DWORD size, DWORD
+         *read = 0;
+     assert(*read <= size);
+ 
+-    if(req->hCacheFile) {
+-        if(*read) {
+-            BOOL bres;
+-            DWORD written;
+-
+-            bres = WriteFile(req->hCacheFile, buf, *read, &written, NULL);
+-            if(bres)
+-                req->cache_size += written;
+-            else
+-                FIXME("WriteFile failed: %lu\n", GetLastError());
+-        }
+-
+-        if((res == ERROR_SUCCESS && !*read) || req->data_stream->vtbl->end_of_data(req->data_stream, req))
+-            commit_cache_entry(req);
+-    }
++    write_cache_file(req, buf, *read);
+ 
+     return res;
+ }
+-- 
+2.53.0
+

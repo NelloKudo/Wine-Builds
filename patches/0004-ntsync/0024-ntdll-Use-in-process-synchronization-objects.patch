@@ -1,4 +1,4 @@
-From ee0af1d0867deb0ac8c9c7e2866f2e817e0524c8 Mon Sep 17 00:00:00 2001
+From a4e113caf0e6331ecd4780f9be6c9128e3f1a613 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 6 Apr 2021 23:37:02 +0300
 Subject: [PATCH 24/44] ntdll: Use in-process synchronization objects.
@@ -882,7 +882,7 @@ index 9936731c787..400bf3e7e1c 100644
      select_op.signal_and_wait.op = SELECT_SIGNAL_AND_WAIT;
      select_op.signal_and_wait.wait = wine_server_obj_handle( wait );
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index e53889a74eb..9b30aa2595e 100644
+index ea87be93bdc..4a463c0b6f2 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
 @@ -117,6 +117,7 @@ struct ntdll_thread_data
@@ -893,7 +893,7 @@ index e53889a74eb..9b30aa2595e 100644
  };
  
  C_ASSERT( sizeof(struct ntdll_thread_data) <= sizeof(((TEB *)0)->GdiTebBatch) );
-@@ -403,6 +404,7 @@ extern void call_raise_user_exception_dispatcher(void);
+@@ -404,6 +405,7 @@ extern void call_raise_user_exception_dispatcher(void);
  #define IMAGE_DLLCHARACTERISTICS_PREFER_NATIVE 0x0010 /* Wine extension */
  
  #define TICKSPERSEC 10000000
@@ -902,7 +902,7 @@ index e53889a74eb..9b30aa2595e 100644
  
  static inline ULONGLONG ticks_from_time_t( time_t time )
 diff --git a/dlls/ntdll/unix/virtual.c b/dlls/ntdll/unix/virtual.c
-index dac1ca2c42d..62fe42f0099 100644
+index ce357b81a5e..dd18786a59f 100644
 --- a/dlls/ntdll/unix/virtual.c
 +++ b/dlls/ntdll/unix/virtual.c
 @@ -4038,6 +4038,7 @@ static TEB *init_teb( void *ptr, BOOL is_wow )
@@ -914,5 +914,5 @@ index dac1ca2c42d..62fe42f0099 100644
      return teb;
  }
 -- 
-2.51.2
+2.53.0
 

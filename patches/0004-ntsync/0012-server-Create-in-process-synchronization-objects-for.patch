@@ -1,4 +1,4 @@
-From 310cfd76cf833b65e4f28a67ce46e9bb55058529 Mon Sep 17 00:00:00 2001
+From 85892b4cc8ed97a23d3cef4bbe05e33975997b23 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 9 Mar 2021 01:16:53 +0200
 Subject: [PATCH 12/44] server: Create in-process synchronization objects for
@@ -10,7 +10,7 @@ Subject: [PATCH 12/44] server: Create in-process synchronization objects for
  2 files changed, 16 insertions(+), 1 deletion(-)
 
 diff --git a/server/process.c b/server/process.c
-index 0044c54546b..7c8fbb6a8a5 100644
+index 876fe604b45..1eb43a42cbe 100644
 --- a/server/process.c
 +++ b/server/process.c
 @@ -97,6 +97,7 @@ static unsigned int process_map_access( struct object *obj, unsigned int access
@@ -72,7 +72,7 @@ index 0044c54546b..7c8fbb6a8a5 100644
  
  /* add a thread to a process running threads list */
 diff --git a/server/process.h b/server/process.h
-index 2649f81160a..b6d980a2e94 100644
+index c2f89da4f53..5e71cdc6964 100644
 --- a/server/process.h
 +++ b/server/process.h
 @@ -89,6 +89,7 @@ struct process
@@ -84,5 +84,5 @@ index 2649f81160a..b6d980a2e94 100644
      unsigned int         fsync_idx;
  };
 -- 
-2.51.2
+2.53.0
 

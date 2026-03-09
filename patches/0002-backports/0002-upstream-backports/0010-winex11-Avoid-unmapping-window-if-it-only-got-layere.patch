@@ -1,7 +1,7 @@
-From 4d267f88cea7da6851738f7840113391ae30af07 Mon Sep 17 00:00:00 2001
+From e17938c891ffdeb1c8878549117aec1f0a3ce5fe Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Sun, 16 Nov 2025 10:23:43 +0100
-Subject: [PATCH 10/17] winex11: Avoid unmapping window if it only got layered
+Subject: [PATCH 10/35] winex11: Avoid unmapping window if it only got layered
  style.
 
 Layered window will need to be explicitly hidden, after layered style is
@@ -14,10 +14,10 @@ Wine-Bug: https://bugs.winehq.org/show_bug.cgi?id=58984
  1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
-index 09811e4ae2b..d0cc5b3e6d5 100644
+index a38b9a7fc17..585db1d728f 100644
 --- a/dlls/winex11.drv/window.c
 +++ b/dlls/winex11.drv/window.c
-@@ -3194,7 +3194,7 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
+@@ -3262,7 +3262,7 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
                                const struct window_rects *new_rects, struct window_surface *surface )
  {
      struct x11drv_win_data *data;
@@ -26,7 +26,7 @@ index 09811e4ae2b..d0cc5b3e6d5 100644
      struct window_rects old_rects;
      BOOL was_fullscreen, activate = !(swp_flags & SWP_NOACTIVATE);
  
-@@ -3266,8 +3266,12 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
+@@ -3334,8 +3334,12 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
              BOOL needs_map = TRUE;
  
              /* layered windows are mapped only once their attributes are set */
@@ -42,5 +42,5 @@ index 09811e4ae2b..d0cc5b3e6d5 100644
              release_win_data( data );
              if (needs_icon) fetch_icon_data( hwnd, 0, 0 );
 -- 
-2.51.2
+2.53.0
 

@@ -1,0 +1,96 @@
+From b397bbe83d2ff48ab7d261545d130311d8501bc6 Mon Sep 17 00:00:00 2001
+From: Jacek Caban <jacek@codeweavers.com>
+Date: Mon, 1 Dec 2025 20:55:19 +0100
+Subject: [PATCH 19/35] wininet: Move dwError to http_request_t.
+
+And rename it to state.
+---
+ dlls/wininet/http.c     | 28 ++++++++++++++--------------
+ dlls/wininet/internet.h |  2 +-
+ 2 files changed, 15 insertions(+), 15 deletions(-)
+
+diff --git a/dlls/wininet/http.c b/dlls/wininet/http.c
+index 21394e1c35e..f60aa4534fb 100644
+--- a/dlls/wininet/http.c
++++ b/dlls/wininet/http.c
+@@ -3274,10 +3274,10 @@ static DWORD HTTPREQ_ReadFile(object_header_t *hdr, void *buf, DWORD size, DWORD
+     if(allow_blocking || TryEnterCriticalSection(&req->read_section)) {
+         if(allow_blocking)
+             EnterCriticalSection(&req->read_section);
+-        if(hdr->dwError == ERROR_SUCCESS)
+-            hdr->dwError = INTERNET_HANDLE_IN_USE;
+-        else if(hdr->dwError == INTERNET_HANDLE_IN_USE)
+-            hdr->dwError = ERROR_INTERNET_INTERNAL_ERROR;
++        if(!req->state)
++            req->state = INTERNET_HANDLE_IN_USE;
++        else if(req->state == INTERNET_HANDLE_IN_USE)
++            req->state = ERROR_INTERNET_INTERNAL_ERROR;
+ 
+         if(req->read_size) {
+             read = min(size, req->read_size);
+@@ -3309,10 +3309,10 @@ static DWORD HTTPREQ_ReadFile(object_header_t *hdr, void *buf, DWORD size, DWORD
+             }
+         }
+ 
+-        if(hdr->dwError == INTERNET_HANDLE_IN_USE)
+-            hdr->dwError = ERROR_SUCCESS;
++        if(req->state == INTERNET_HANDLE_IN_USE)
++            req->state = 0;
+         else
+-            error = hdr->dwError;
++            error = req->state;
+ 
+         LeaveCriticalSection( &req->read_section );
+     }else {
+@@ -3370,10 +3370,10 @@ static DWORD HTTPREQ_QueryDataAvailable(object_header_t *hdr, DWORD *available,
+     if(allow_blocking || TryEnterCriticalSection(&req->read_section)) {
+         if(allow_blocking)
+             EnterCriticalSection(&req->read_section);
+-        if(hdr->dwError == ERROR_SUCCESS)
+-            hdr->dwError = INTERNET_HANDLE_IN_USE;
+-        else if(hdr->dwError == INTERNET_HANDLE_IN_USE)
+-            hdr->dwError = ERROR_INTERNET_INTERNAL_ERROR;
++        if(!req->state)
++            req->state = INTERNET_HANDLE_IN_USE;
++        else if(req->state == INTERNET_HANDLE_IN_USE)
++            req->state = ERROR_INTERNET_INTERNAL_ERROR;
+ 
+         avail = req->read_size;
+         if(req->cache_size > req->content_pos)
+@@ -3388,10 +3388,10 @@ static DWORD HTTPREQ_QueryDataAvailable(object_header_t *hdr, DWORD *available,
+             res = refill_read_buffer(req, allow_blocking, &avail);
+         }
+ 
+-        if(hdr->dwError == INTERNET_HANDLE_IN_USE)
+-            hdr->dwError = ERROR_SUCCESS;
++        if(req->state == INTERNET_HANDLE_IN_USE)
++            req->state = 0;
+         else
+-            error = hdr->dwError;
++            error = req->state;
+ 
+         LeaveCriticalSection( &req->read_section );
+     }else {
+diff --git a/dlls/wininet/internet.h b/dlls/wininet/internet.h
+index f77cadc730f..0e867529232 100644
+--- a/dlls/wininet/internet.h
++++ b/dlls/wininet/internet.h
+@@ -248,7 +248,6 @@ struct _object_header_t
+     BOOL valid_handle;
+     DWORD  dwFlags;
+     DWORD_PTR dwContext;
+-    DWORD  dwError;
+     ULONG  ErrorMask;
+     DWORD  dwInternalFlags;
+     LONG   refs;
+@@ -311,6 +310,7 @@ typedef struct {
+ typedef struct
+ {
+     object_header_t hdr;
++    DWORD state;
+     http_session_t *session;
+     server_t *server;
+     server_t *proxy;
+-- 
+2.53.0
+

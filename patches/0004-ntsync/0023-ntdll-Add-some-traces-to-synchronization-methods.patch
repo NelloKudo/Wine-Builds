@@ -1,4 +1,4 @@
-From 2599aeb958c65b0c6041fe7fb3ad339c642e2b8f Mon Sep 17 00:00:00 2001
+From 88d70e426ae8f38885576e3037fb3eb474a06728 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 9 Mar 2021 20:08:29 +0200
 Subject: [PATCH 23/44] ntdll: Add some traces to synchronization methods.
@@ -229,5 +229,5 @@ index e0d8f12aa23..9936731c787 100644
      if ((ULONG_PTR)key & 1) return STATUS_INVALID_PARAMETER_1;
      if (alertable) flags |= SELECT_ALERTABLE;
 -- 
-2.51.2
+2.53.0
 

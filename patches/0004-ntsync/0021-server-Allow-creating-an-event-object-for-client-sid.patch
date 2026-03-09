@@ -1,4 +1,4 @@
-From d36f8dd94bafa70550d07c668a8f4ec36fb42903 Mon Sep 17 00:00:00 2001
+From 6fe719a0f70d08fd21d12b6d882b0de537048787 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Fri, 22 Apr 2022 00:11:14 +0300
 Subject: [PATCH 21/44] server: Allow creating an event object for client-side
@@ -11,10 +11,10 @@ Subject: [PATCH 21/44] server: Allow creating an event object for client-side
  3 files changed, 27 insertions(+)
 
 diff --git a/server/protocol.def b/server/protocol.def
-index 41eef11bbcb..b463f432778 100644
+index 22a6b8df568..7746e5c0407 100644
 --- a/server/protocol.def
 +++ b/server/protocol.def
-@@ -4293,3 +4293,10 @@ enum inproc_sync_type
+@@ -4308,3 +4308,10 @@ enum inproc_sync_type
  @REQ(unselect_inproc_queue)
      int          signaled;        /* was the queue signaled? */
  @END
@@ -100,5 +100,5 @@ index 9183d7b4fc5..7bef496199b 100644
  
  extern struct thread *current;
 -- 
-2.51.2
+2.53.0
 

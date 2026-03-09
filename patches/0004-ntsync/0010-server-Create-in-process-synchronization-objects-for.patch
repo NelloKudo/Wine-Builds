@@ -1,4 +1,4 @@
-From 505835c4c111375f079de301c113ab81380d41f6 Mon Sep 17 00:00:00 2001
+From 7e61d6b738c064b03db222b8f79c606dc1edaed4 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Wed, 10 Mar 2021 19:02:42 +0200
 Subject: [PATCH 10/44] server: Create in-process synchronization objects for
@@ -106,5 +106,5 @@ index dd979e05993..b59d19bc615 100644
                  if (irp->file) grab_object( irp );
                  manager->current_call = irp;
 -- 
-2.51.2
+2.53.0
 

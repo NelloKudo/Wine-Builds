@@ -1,4 +1,4 @@
-From 8cb26840e77a3b6dfa58f82e7c11fa77eb3a7b78 Mon Sep 17 00:00:00 2001
+From ee2e53b90396b5f20c3c6479263ddafd9883a60b Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 9 Mar 2021 00:38:18 +0200
 Subject: [PATCH 03/44] server: Create in-process synchronization objects for
@@ -14,10 +14,10 @@ Subject: [PATCH 03/44] server: Create in-process synchronization objects for
  create mode 100644 server/inproc_sync.c
 
 diff --git a/configure.ac b/configure.ac
-index 8a9dd26ea15..c74236c4362 100644
+index dc69e6f75aa..37775e1fa7f 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -684,6 +684,7 @@ AC_CHECK_HEADERS(\
+@@ -687,6 +687,7 @@ AC_CHECK_HEADERS(\
  	linux/input.h \
  	linux/ioctl.h \
  	linux/major.h \
@@ -445,5 +445,5 @@ index 2f05da81ae8..275a3daf36b 100644
  
  /* serial functions */
 -- 
-2.51.2
+2.53.0
 

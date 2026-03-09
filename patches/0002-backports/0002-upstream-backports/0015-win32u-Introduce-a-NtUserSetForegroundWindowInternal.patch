@@ -1,7 +1,7 @@
-From 47b743cb8c224fa12a73a8786fd89493e031c8af Mon Sep 17 00:00:00 2001
+From f1deb778b6d2db1598dfa6dcd44f94b825c441bf Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Sun, 16 Nov 2025 22:02:24 +0100
-Subject: [PATCH 15/17] win32u: Introduce a NtUserSetForegroundWindowInternal
+Subject: [PATCH 15/35] win32u: Introduce a NtUserSetForegroundWindowInternal
  call.
 
 For user drivers to forcefully change foreground window, regardless of
@@ -35,10 +35,10 @@ index 4055d5b9a68..1f9c9a4c7cb 100644
              break;
          }
 diff --git a/dlls/win32u/input.c b/dlls/win32u/input.c
-index 3c6249d211e..6e593a2f1bd 100644
+index 9dc77c2550a..8e8c21afaf1 100644
 --- a/dlls/win32u/input.c
 +++ b/dlls/win32u/input.c
-@@ -2138,7 +2138,7 @@ HWND WINAPI NtUserSetFocus( HWND hwnd )
+@@ -2136,7 +2136,7 @@ HWND WINAPI NtUserSetFocus( HWND hwnd )
          if (call_hooks( WH_CBT, HCBT_SETFOCUS, (WPARAM)hwnd, (LPARAM)previous, 0 )) return 0;
  
          /* activate hwndTop if needed. */
@@ -47,7 +47,7 @@ index 3c6249d211e..6e593a2f1bd 100644
          if (hwndTop != active)
          {
              if (!set_active_window( hwndTop, NULL, FALSE, FALSE, 0 )) return 0;
-@@ -2163,13 +2163,13 @@ HWND WINAPI NtUserSetFocus( HWND hwnd )
+@@ -2161,13 +2161,13 @@ HWND WINAPI NtUserSetFocus( HWND hwnd )
   */
  BOOL WINAPI NtUserSetForegroundWindow( HWND hwnd )
  {
@@ -63,7 +63,7 @@ index 3c6249d211e..6e593a2f1bd 100644
  {
      BOOL ret, send_msg_old = FALSE, send_msg_new = FALSE;
      DWORD new_thread_id;
-@@ -2181,6 +2181,7 @@ BOOL set_foreground_window( HWND hwnd, BOOL mouse )
+@@ -2179,6 +2179,7 @@ BOOL set_foreground_window( HWND hwnd, BOOL mouse )
      SERVER_START_REQ( set_foreground_window )
      {
          req->handle = wine_server_user_handle( hwnd );
@@ -72,10 +72,10 @@ index 3c6249d211e..6e593a2f1bd 100644
          {
              previous = wine_server_ptr_handle( reply->previous );
 diff --git a/dlls/win32u/message.c b/dlls/win32u/message.c
-index 035ab6574e4..6df5b680cec 100644
+index 84ac1ae69c5..5475daa8820 100644
 --- a/dlls/win32u/message.c
 +++ b/dlls/win32u/message.c
-@@ -2179,7 +2179,7 @@ static LRESULT handle_internal_message( HWND hwnd, UINT msg, WPARAM wparam, LPAR
+@@ -2186,7 +2186,7 @@ static LRESULT handle_internal_message( HWND hwnd, UINT msg, WPARAM wparam, LPAR
          HWND foreground;
  
          if (!user_driver->pGetWindowStateUpdates( hwnd, &state_cmd, &config_cmd, &window_rect, &foreground )) return 0;
@@ -84,7 +84,7 @@ index 035ab6574e4..6df5b680cec 100644
          if (state_cmd)
          {
              if (LOWORD(state_cmd) == SC_RESTORE && HIWORD(state_cmd)) NtUserSetActiveWindow( hwnd );
-@@ -2187,7 +2187,7 @@ static LRESULT handle_internal_message( HWND hwnd, UINT msg, WPARAM wparam, LPAR
+@@ -2194,7 +2194,7 @@ static LRESULT handle_internal_message( HWND hwnd, UINT msg, WPARAM wparam, LPAR
  
              /* state change might have changed the window config already, check again */
              user_driver->pGetWindowStateUpdates( hwnd, &state_cmd, &config_cmd, &window_rect, &foreground );
@@ -93,7 +93,7 @@ index 035ab6574e4..6df5b680cec 100644
              if (state_cmd) WARN( "window %p state needs another update, ignoring\n", hwnd );
          }
          if (config_cmd)
-@@ -2681,7 +2681,7 @@ static BOOL process_mouse_message( MSG *msg, UINT hw_id, ULONG_PTR extra_info, H
+@@ -2688,7 +2688,7 @@ static BOOL process_mouse_message( MSG *msg, UINT hw_id, ULONG_PTR extra_info, H
                      /* fall through */
                  case MA_ACTIVATE:
                  case 0:
@@ -103,10 +103,10 @@ index 035ab6574e4..6df5b680cec 100644
                  default:
                      WARN( "unknown WM_MOUSEACTIVATE code %d\n", ret );
 diff --git a/dlls/win32u/win32u_private.h b/dlls/win32u/win32u_private.h
-index 63e9c517a1f..0506b9c1cd1 100644
+index ad1ca031c69..f6c0cffd4e7 100644
 --- a/dlls/win32u/win32u_private.h
 +++ b/dlls/win32u/win32u_private.h
-@@ -95,7 +95,7 @@ extern DWORD get_input_state(void);
+@@ -99,7 +99,7 @@ extern DWORD get_input_state(void);
  extern DWORD get_last_input_time(void);
  extern BOOL get_async_keyboard_state( BYTE state[256] );
  extern BOOL set_capture_window( HWND hwnd, UINT gui_flags, HWND *prev_ret );
@@ -116,10 +116,10 @@ index 63e9c517a1f..0506b9c1cd1 100644
  extern BOOL set_ime_composition_rect( HWND hwnd, RECT rect );
  extern void toggle_caret( HWND hwnd );
 diff --git a/dlls/win32u/window.c b/dlls/win32u/window.c
-index 16373d2e6e9..848e8286298 100644
+index d8673749176..be709f9b2e6 100644
 --- a/dlls/win32u/window.c
 +++ b/dlls/win32u/window.c
-@@ -3866,7 +3866,7 @@ BOOL set_window_pos( WINDOWPOS *winpos, int parent_x, int parent_y )
+@@ -3901,7 +3901,7 @@ BOOL set_window_pos( WINDOWPOS *winpos, int parent_x, int parent_y )
          if ((style & (WS_CHILD | WS_POPUP)) == WS_CHILD)
              send_message( winpos->hwnd, WM_CHILDACTIVATE, 0, 0 );
          else if (!(style & WS_MINIMIZE))
@@ -128,7 +128,7 @@ index 16373d2e6e9..848e8286298 100644
      }
  
      if(!(orig_flags & SWP_DEFERERASE))
-@@ -4211,7 +4211,7 @@ static void activate_other_window( HWND hwnd )
+@@ -4246,7 +4246,7 @@ static void activate_other_window( HWND hwnd )
      TRACE( "win = %p fg = %p\n", hwnd_to, fg );
      if (!fg || hwnd == fg)
      {
@@ -137,7 +137,7 @@ index 16373d2e6e9..848e8286298 100644
      }
      if (NtUserSetActiveWindow( hwnd_to )) NtUserSetActiveWindow( 0 );
  }
-@@ -5909,6 +5909,9 @@ ULONG_PTR WINAPI NtUserCallHwnd( HWND hwnd, DWORD code )
+@@ -5936,6 +5936,9 @@ ULONG_PTR WINAPI NtUserCallHwnd( HWND hwnd, DWORD code )
          activate_other_window( hwnd );
          return 0;
  
@@ -148,10 +148,10 @@ index 16373d2e6e9..848e8286298 100644
          return get_dpi_for_window( hwnd );
  
 diff --git a/dlls/winemac.drv/window.c b/dlls/winemac.drv/window.c
-index 765649f40e4..79464944c5d 100644
+index b1ba0829c6f..460d8217cda 100644
 --- a/dlls/winemac.drv/window.c
 +++ b/dlls/winemac.drv/window.c
-@@ -1758,7 +1758,7 @@ void macdrv_window_got_focus(HWND hwnd, const macdrv_event *event)
+@@ -1767,7 +1767,7 @@ void macdrv_window_got_focus(HWND hwnd, const macdrv_event *event)
      if (can_window_become_foreground(hwnd) && !(style & WS_MINIMIZE))
      {
          TRACE("setting foreground window to %p\n", hwnd);
@@ -160,7 +160,7 @@ index 765649f40e4..79464944c5d 100644
          return;
      }
  
-@@ -1782,7 +1782,7 @@ void macdrv_window_lost_focus(HWND hwnd, const macdrv_event *event)
+@@ -1791,7 +1791,7 @@ void macdrv_window_lost_focus(HWND hwnd, const macdrv_event *event)
      {
          send_message(hwnd, WM_CANCELMODE, 0, 0);
          if (hwnd == NtUserGetForegroundWindow())
@@ -169,7 +169,7 @@ index 765649f40e4..79464944c5d 100644
      }
  }
  
-@@ -1811,7 +1811,7 @@ void macdrv_app_deactivated(void)
+@@ -1820,7 +1820,7 @@ void macdrv_app_deactivated(void)
      if (get_active_window() == NtUserGetForegroundWindow())
      {
          TRACE("setting fg to desktop\n");
@@ -178,7 +178,7 @@ index 765649f40e4..79464944c5d 100644
      }
  }
  
-@@ -1975,7 +1975,7 @@ void macdrv_window_drag_begin(HWND hwnd, const macdrv_event *event)
+@@ -1984,7 +1984,7 @@ void macdrv_window_drag_begin(HWND hwnd, const macdrv_event *event)
          if (ma != MA_NOACTIVATEANDEAT && ma != MA_NOACTIVATE)
          {
              TRACE("setting foreground window to %p\n", hwnd);
@@ -188,10 +188,10 @@ index 765649f40e4..79464944c5d 100644
      }
  
 diff --git a/dlls/winewayland.drv/window.c b/dlls/winewayland.drv/window.c
-index 79a6a584728..b088c3337eb 100644
+index f945b390001..926d1665956 100644
 --- a/dlls/winewayland.drv/window.c
 +++ b/dlls/winewayland.drv/window.c
-@@ -654,7 +654,7 @@ LRESULT WAYLAND_WindowMessage(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+@@ -657,7 +657,7 @@ LRESULT WAYLAND_WindowMessage(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
          wayland_configure_window(hwnd);
          return 0;
      case WM_WAYLAND_SET_FOREGROUND:
@@ -232,10 +232,10 @@ index f4715cd51f7..8e896e4ba1d 100644
      }
   }
 diff --git a/include/ntuser.h b/include/ntuser.h
-index 029a8bea8f2..5d4899f0b12 100644
+index 3bc81bc054a..6e19be01253 100644
 --- a/include/ntuser.h
 +++ b/include/ntuser.h
-@@ -1293,6 +1293,7 @@ enum
+@@ -1294,6 +1294,7 @@ enum
      NtUserCallHwnd_IsWindowEnabled,
      NtUserCallHwnd_IsWindowUnicode,
      NtUserCallHwnd_IsWindowVisible,
@@ -243,7 +243,7 @@ index 029a8bea8f2..5d4899f0b12 100644
      /* temporary exports */
      NtUserGetFullWindowHandle,
      NtUserIsCurrentProcessWindow,
-@@ -1304,6 +1305,11 @@ static inline void NtUserActivateOtherWindow( HWND hwnd )
+@@ -1305,6 +1306,11 @@ static inline void NtUserActivateOtherWindow( HWND hwnd )
      NtUserCallHwnd( hwnd, NtUserCallHwnd_ActivateOtherWindow );
  }
  
@@ -256,10 +256,10 @@ index 029a8bea8f2..5d4899f0b12 100644
  {
      return (void *)NtUserCallHwnd( hwnd, NtUserCallHwnd_GetDialogInfo );
 diff --git a/server/protocol.def b/server/protocol.def
-index 5eee7d35a34..9e221b79f8b 100644
+index e71240982e2..d0cc30f34bc 100644
 --- a/server/protocol.def
 +++ b/server/protocol.def
-@@ -3107,6 +3107,7 @@ enum coords_relative
+@@ -3121,6 +3121,7 @@ enum coords_relative
  /* Set the system foreground window */
  @REQ(set_foreground_window)
      user_handle_t  handle;        /* handle to the foreground window */
@@ -268,5 +268,5 @@ index 5eee7d35a34..9e221b79f8b 100644
      user_handle_t  previous;      /* handle to the previous foreground window */
      int            send_msg_old;  /* whether we have to send a msg to the old window */
 -- 
-2.51.2
+2.53.0
 

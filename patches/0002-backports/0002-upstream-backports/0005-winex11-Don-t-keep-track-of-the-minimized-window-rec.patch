@@ -1,7 +1,7 @@
-From c298c876549a877860e38735d704537331d99cc9 Mon Sep 17 00:00:00 2001
+From ec350d559799157bdaa9ff98eb18fc39e7e47078 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Fri, 24 Oct 2025 20:59:25 +0200
-Subject: [PATCH 05/17] winex11: Don't keep track of the minimized window
+Subject: [PATCH 05/35] winex11: Don't keep track of the minimized window
  rects.
 
 We use the window vs visible rect differences to compute the new window
@@ -22,10 +22,10 @@ Wine-Bug: https://bugs.winehq.org/show_bug.cgi?id=58852
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
-index d4e8ba8a52d..179bbc8e671 100644
+index 2017b8131f6..fc4c26289e5 100644
 --- a/dlls/winex11.drv/window.c
 +++ b/dlls/winex11.drv/window.c
-@@ -3207,7 +3207,7 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
+@@ -3275,7 +3275,7 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
  
      old_rects = data->rects;
      was_fullscreen = data->is_fullscreen;
@@ -35,5 +35,5 @@ index d4e8ba8a52d..179bbc8e671 100644
  
      TRACE( "win %p/%lx new_rects %s style %08x flags %08x\n", hwnd, data->whole_window,
 -- 
-2.51.2
+2.53.0
 

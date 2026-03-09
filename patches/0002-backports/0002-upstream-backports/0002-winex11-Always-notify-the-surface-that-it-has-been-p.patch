@@ -1,7 +1,7 @@
-From 4bf62934b8c65f266c8862ded7d7a8f04f309f25 Mon Sep 17 00:00:00 2001
+From c2bbd18d372aba306d11149de569a5a28d175393 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Tue, 16 Sep 2025 09:39:04 +0200
-Subject: [PATCH 02/17] winex11: Always notify the surface that it has been
+Subject: [PATCH 02/35] winex11: Always notify the surface that it has been
  presented.
 
 It might not be offscreen but it might have been detached if multiple
@@ -98,5 +98,5 @@ index a25f291a2cf..b810689ff3d 100644
  }
  
 -- 
-2.51.2
+2.53.0
 

@@ -1,4 +1,4 @@
-From 842e2cec0a9e8052a7f5c0ceaf6b86e119b8a936 Mon Sep 17 00:00:00 2001
+From 23fa87f15f37e9ce47cb8ecdc902ac8ee5dd7723 Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Thu, 26 Dec 2024 07:00:02 -0800
 Subject: [PATCH 32/44] ntdll: Increase cache entries to 256.
@@ -36,5 +36,5 @@ index be1520de0ac..296eefff2f0 100644
  static struct inproc_sync_cache_entry *inproc_sync_cache[INPROC_SYNC_CACHE_ENTRIES];
  static struct inproc_sync_cache_entry inproc_sync_cache_initial_block[INPROC_SYNC_CACHE_BLOCK_SIZE];
 -- 
-2.51.2
+2.53.0
 

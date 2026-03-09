@@ -1,4 +1,4 @@
-From ba124a226dc6cbc03ded436e027598e44d1896e4 Mon Sep 17 00:00:00 2001
+From fe25ff663628e2d39db64308cb370fbbe0679c37 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Mon, 8 Mar 2021 17:40:57 -0600
 Subject: [PATCH 17/44] server: Create in-process synchronization objects for
@@ -43,10 +43,10 @@ index b59d19bc615..e0df3103703 100644
      device_file_destroy               /* destroy */
  };
 diff --git a/server/fd.c b/server/fd.c
-index a78360be754..52316781d1d 100644
+index abe29866f57..8fa8270441a 100644
 --- a/server/fd.c
 +++ b/server/fd.c
-@@ -156,6 +156,7 @@ struct fd
+@@ -161,6 +161,7 @@ struct fd
      struct completion   *completion;  /* completion object attached to this fd */
      apc_param_t          comp_key;    /* completion key to set in completion events */
      unsigned int         comp_flags;  /* completion flags */
@@ -54,7 +54,7 @@ index a78360be754..52316781d1d 100644
      int                  esync_fd;    /* esync file descriptor */
      unsigned int         fsync_idx;   /* fsync shm index */
  };
-@@ -1600,6 +1601,7 @@ static void fd_destroy( struct object *obj )
+@@ -1680,6 +1681,7 @@ static void fd_destroy( struct object *obj )
      if (do_esync())
          close( fd->esync_fd );
      if (fd->fsync_idx) fsync_free_shm_idx( fd->fsync_idx );
@@ -62,7 +62,7 @@ index a78360be754..52316781d1d 100644
  }
  
  /* check if the desired access is possible without violating */
-@@ -1715,6 +1717,7 @@ static struct fd *alloc_fd_object(void)
+@@ -1795,6 +1797,7 @@ static struct fd *alloc_fd_object(void)
      fd->poll_index = -1;
      fd->completion = NULL;
      fd->comp_flags = 0;
@@ -70,7 +70,7 @@ index a78360be754..52316781d1d 100644
      fd->esync_fd   = -1;
      fd->fsync_idx  = 0;
      init_async_queue( &fd->read_q );
-@@ -1763,6 +1766,7 @@ struct fd *alloc_pseudo_fd( const struct fd_ops *fd_user_ops, struct object *use
+@@ -1843,6 +1846,7 @@ struct fd *alloc_pseudo_fd( const struct fd_ops *fd_user_ops, struct object *use
      fd->poll_index = -1;
      fd->completion = NULL;
      fd->comp_flags = 0;
@@ -78,7 +78,7 @@ index a78360be754..52316781d1d 100644
      fd->no_fd_status = STATUS_BAD_DEVICE_TYPE;
      fd->esync_fd   = -1;
      fd->fsync_idx  = 0;
-@@ -2182,7 +2186,15 @@ void set_fd_signaled( struct fd *fd, int signaled )
+@@ -2332,7 +2336,15 @@ void set_fd_signaled( struct fd *fd, int signaled )
  {
      if (fd->comp_flags & FILE_SKIP_SET_EVENT_ON_HANDLE) return;
      fd->signaled = signaled;
@@ -95,7 +95,7 @@ index a78360be754..52316781d1d 100644
  
      if (do_fsync() && !signaled)
          fsync_clear( fd->user );
-@@ -2248,6 +2260,19 @@ unsigned int default_fd_get_fsync_idx( struct object *obj, enum fsync_type *type
+@@ -2398,6 +2410,19 @@ unsigned int default_fd_get_fsync_idx( struct object *obj, enum fsync_type *type
      return ret;
  }
  
@@ -116,7 +116,7 @@ index a78360be754..52316781d1d 100644
  {
      int events = 0;
 diff --git a/server/file.c b/server/file.c
-index a402ee916e6..c28b59be211 100644
+index 83c3d2039b0..791c06f82ac 100644
 --- a/server/file.c
 +++ b/server/file.c
 @@ -137,7 +137,7 @@ static const struct object_ops file_ops =
@@ -225,10 +225,10 @@ index 93619ebccde..c1bdfbbe2b5 100644
      serial_destroy                /* destroy */
  };
 diff --git a/server/sock.c b/server/sock.c
-index 87bd679a592..7c7e1cf24e4 100644
+index 2587f4db4fe..74ca173fe6d 100644
 --- a/server/sock.c
 +++ b/server/sock.c
-@@ -500,7 +500,7 @@ static const struct object_ops sock_ops =
+@@ -505,7 +505,7 @@ static const struct object_ops sock_ops =
      NULL,                         /* unlink_name */
      no_open_file,                 /* open_file */
      no_kernel_obj_list,           /* get_kernel_obj_list */
@@ -238,5 +238,5 @@ index 87bd679a592..7c7e1cf24e4 100644
      sock_destroy                  /* destroy */
  };
 -- 
-2.51.2
+2.53.0
 

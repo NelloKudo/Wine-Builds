@@ -1,7 +1,7 @@
-From 59b9ac2c1cfd23af3efe2d558c52a7faf4d3a87c Mon Sep 17 00:00:00 2001
+From 2a85e8e0205cabce4de168f49d2f753306ecffee Mon Sep 17 00:00:00 2001
 From: Dmitry Timoshkov <dmitry@baikal.ru>
 Date: Mon, 15 Sep 2025 17:22:20 +0300
-Subject: [PATCH 01/17] winex11.drv: Remove a no longer valid assert().
+Subject: [PATCH 01/35] winex11.drv: Remove a no longer valid assert().
 
 This is a regression caused by f74900ad1a580eda8fd4923cbd4881b42b042733
 that made dmDriverExtra be either to 0 or sizeof(void *).
@@ -24,5 +24,5 @@ index dd762f23705..f2313d88090 100644
          XFree(xf86vm_modes);
          free(ptr);
 -- 
-2.51.2
+2.53.0
 

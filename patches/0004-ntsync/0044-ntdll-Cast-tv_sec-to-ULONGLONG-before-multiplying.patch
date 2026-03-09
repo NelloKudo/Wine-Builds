@@ -1,4 +1,4 @@
-From 9a65b489c4ac42fc149a309833801010da890a70 Mon Sep 17 00:00:00 2001
+From 77f289ca17a5dcaa8fb51494babfc42aeddd6ae8 Mon Sep 17 00:00:00 2001
 From: Sven Baars <sbaars@codeweavers.com>
 Date: Tue, 14 Oct 2025 16:41:29 +0200
 Subject: [PATCH 44/44] ntdll: Cast tv_sec to ULONGLONG before multiplying.
@@ -22,5 +22,5 @@ index 5c116fe7b56..79dc79507f7 100644
      else
      {
 -- 
-2.51.2
+2.53.0
 

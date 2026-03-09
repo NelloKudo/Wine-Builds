@@ -1,4 +1,4 @@
-From 882e5cf9dc46c5fef94df8b6b119990a4a08a231 Mon Sep 17 00:00:00 2001
+From 4d4a2cfadfde6e66e97d80db4843e0205ad06e95 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Thu, 11 Mar 2021 16:52:55 -0600
 Subject: [PATCH 05/44] server: Create in-process synchronization objects for
@@ -201,5 +201,5 @@ index 3c023b0c500..b505b2ed9e6 100644
  extern struct inproc_sync *no_get_inproc_sync( struct object *obj );
  
 -- 
-2.51.2
+2.53.0
 

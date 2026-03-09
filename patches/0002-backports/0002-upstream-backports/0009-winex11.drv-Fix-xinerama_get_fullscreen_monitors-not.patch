@@ -1,7 +1,7 @@
-From 870bb64884585184576b5596c564031f10fc746a Mon Sep 17 00:00:00 2001
+From db9a58a2f2c69028c6dfee98625943d67501ab43 Mon Sep 17 00:00:00 2001
 From: Zhiyi Zhang <zzhang@codeweavers.com>
 Date: Thu, 13 Nov 2025 16:51:41 +0800
-Subject: [PATCH 09/17] winex11.drv: Fix xinerama_get_fullscreen_monitors() not
+Subject: [PATCH 09/35] winex11.drv: Fix xinerama_get_fullscreen_monitors() not
  working correctly with non-fullscreen rects.
 
 xinerama_get_fullscreen_monitors() was supposed to be called with fullscreen rects. Thus, we could
@@ -17,10 +17,10 @@ Fix the Guild Wars 2 game window having an offset in fullscreen mode.
  3 files changed, 12 insertions(+), 14 deletions(-)
 
 diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
-index c841b49044f..09811e4ae2b 100644
+index 77c95cf2eb9..a38b9a7fc17 100644
 --- a/dlls/winex11.drv/window.c
 +++ b/dlls/winex11.drv/window.c
-@@ -1715,9 +1715,10 @@ static UINT window_update_client_config( struct x11drv_win_data *data )
+@@ -1767,9 +1767,10 @@ static UINT window_update_client_config( struct x11drv_win_data *data )
       * window rect will be repeatedly changed by the WM and the application, causing a flickering effect */
      if (data->is_fullscreen)
      {
@@ -91,5 +91,5 @@ index 5086f3ee766..99c0080464f 100644
  
  static BOOL xinerama_get_gpus( struct x11drv_gpu **new_gpus, int *count, BOOL get_properties )
 -- 
-2.51.2
+2.53.0
 

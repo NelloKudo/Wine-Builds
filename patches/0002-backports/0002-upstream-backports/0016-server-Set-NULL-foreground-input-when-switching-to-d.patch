@@ -1,7 +1,7 @@
-From d10e708a83f614ebbfa6ad0f472c50a4923ffad0 Mon Sep 17 00:00:00 2001
+From 7c61a9861f8a260fe13a91922847b5e3114e8f6a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Tue, 18 Nov 2025 17:17:13 +0100
-Subject: [PATCH 16/17] server: Set NULL foreground input when switching to
+Subject: [PATCH 16/35] server: Set NULL foreground input when switching to
  desktop window.
 
 When called from the application.
@@ -42,5 +42,5 @@ index 5e601f0be8c..d1f48ead214 100644
      }
      else set_win32_error( ERROR_INVALID_WINDOW_HANDLE );
 -- 
-2.51.2
+2.53.0
 

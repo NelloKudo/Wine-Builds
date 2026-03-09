@@ -1,4 +1,4 @@
-From 83423c868fcd1a9095b8587800b22376768fd6ce Mon Sep 17 00:00:00 2001
+From 9c1a31a1e1a2afb74a6af1f2cdf3d8fc6dedd9ee Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Wed, 2 Apr 2025 03:05:34 -0700
 Subject: [PATCH 37/44] wine: Consolidate and clean up startup messaging.
@@ -20,7 +20,7 @@ Subject: [PATCH 37/44] wine: Consolidate and clean up startup messaging.
  create mode 100644 dlls/ntdll/loader.c.rej
 
 diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
-index 30b23155645..fa1a3dbe056 100644
+index 8715ae91d60..e5bd2f8bd5d 100644
 --- a/dlls/ntdll/loader.c
 +++ b/dlls/ntdll/loader.c
 @@ -44,6 +44,7 @@ WINE_DECLARE_DEBUG_CHANNEL(snoop);
@@ -31,7 +31,7 @@ index 30b23155645..fa1a3dbe056 100644
  
  #ifdef _WIN64
  #define DEFAULT_SECURITY_COOKIE_64  (((ULONGLONG)0x00002b99 << 32) | 0x2ddfa232)
-@@ -3491,6 +3492,13 @@ unsigned int CDECL wine_server_call( void *req_ptr )
+@@ -3534,6 +3535,13 @@ unsigned int CDECL wine_server_call( void *req_ptr )
      return WINE_UNIX_CALL( unix_wine_server_call, req_ptr );
  }
  
@@ -45,7 +45,7 @@ index 30b23155645..fa1a3dbe056 100644
  
  /***********************************************************************
   *           wine_server_fd_to_handle
-@@ -4487,9 +4495,9 @@ static void release_address_space(void)
+@@ -4533,9 +4541,9 @@ static void release_address_space(void)
   */
  void loader_init( CONTEXT *context, void **entry )
  {
@@ -58,7 +58,7 @@ index 30b23155645..fa1a3dbe056 100644
      static int attach_done;
      NTSTATUS status;
      ULONG_PTR cookie, port = 0;
-@@ -4590,17 +4598,38 @@ void loader_init( CONTEXT *context, void **entry )
+@@ -4636,17 +4644,38 @@ void loader_init( CONTEXT *context, void **entry )
          /* This hunk occasionally applies in the wrong place;
           * add a comment here to try to prevent that. */
      }
@@ -145,10 +145,10 @@ index 00000000000..91b5a4fe8ef
 +     NtCurrentTeb()->FlsSlots = fls_alloc_data();
 + 
 diff --git a/dlls/ntdll/ntdll.spec b/dlls/ntdll/ntdll.spec
-index 604c342ba35..8f758327b17 100644
+index ffcb7a0549c..ea0c695ad8c 100644
 --- a/dlls/ntdll/ntdll.spec
 +++ b/dlls/ntdll/ntdll.spec
-@@ -1755,6 +1755,8 @@
+@@ -1756,6 +1756,8 @@
  @ cdecl -norelay __wine_dbg_output(str)
  @ cdecl -norelay __wine_dbg_strdup(str)
  
@@ -216,10 +216,10 @@ index 7fdf400b3e3..dce97dbaa49 100644
   *              NtCreateSemaphore (NTDLL.@)
   */
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index f9d7879122c..1338dca44f6 100644
+index 6927de37ef9..a2dccd459b4 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
-@@ -401,6 +401,8 @@ extern void dbg_init(void);
+@@ -402,6 +402,8 @@ extern void dbg_init(void);
  extern void close_inproc_sync_obj( HANDLE handle );
  extern NTSTATUS do_ntsync(void);
  
@@ -241,10 +241,10 @@ index 9cb444342fe..d9ee7bbb394 100644
  
  extern unixlib_handle_t __wine_unixlib_handle;
 diff --git a/include/winternl.h b/include/winternl.h
-index 8c7ab65e20c..8592f04f652 100644
+index 6630891aaff..56ffd0f3df8 100644
 --- a/include/winternl.h
 +++ b/include/winternl.h
-@@ -5354,6 +5354,8 @@ static inline PLIST_ENTRY RemoveTailList(PLIST_ENTRY le)
+@@ -5390,6 +5390,8 @@ static inline PLIST_ENTRY RemoveTailList(PLIST_ENTRY le)
  
  NTSYSAPI NTSTATUS WINAPI __wine_unix_spawnvp( char * const argv[], int wait );
  
@@ -314,5 +314,5 @@ index 948855ab09a..fb58962e9e4 100644
      set_current_time();
      init_signals();
 -- 
-2.51.2
+2.53.0
 

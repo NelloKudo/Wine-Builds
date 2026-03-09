@@ -1,7 +1,7 @@
-From acc9f173c5a6ca7bdcd4bc97171fd532b5fa487d Mon Sep 17 00:00:00 2001
+From 9dd9b0e4056f4b199058a997de49d7af4f53f198 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Fri, 24 Oct 2025 10:26:22 +0200
-Subject: [PATCH 13/17] win32u: Get rid of is_window_rect_full_screen helper.
+Subject: [PATCH 13/35] win32u: Get rid of is_window_rect_full_screen helper.
 
 ---
  dlls/win32u/input.c          | 27 ++++++++++++++++-----------
@@ -10,10 +10,10 @@ Subject: [PATCH 13/17] win32u: Get rid of is_window_rect_full_screen helper.
  3 files changed, 16 insertions(+), 38 deletions(-)
 
 diff --git a/dlls/win32u/input.c b/dlls/win32u/input.c
-index 77b58b6a503..3c6249d211e 100644
+index e224d4c8529..9dc77c2550a 100644
 --- a/dlls/win32u/input.c
 +++ b/dlls/win32u/input.c
-@@ -2610,6 +2610,12 @@ static BOOL is_captured_by_system(void)
+@@ -2608,6 +2608,12 @@ static BOOL is_captured_by_system(void)
      return NtUserGetGUIThreadInfo( GetCurrentThreadId(), &info ) && info.hwndCapture && (info.flags & (GUI_INMOVESIZE | GUI_INMENUMODE));
  }
  
@@ -26,7 +26,7 @@ index 77b58b6a503..3c6249d211e 100644
  /***********************************************************************
   *      clip_fullscreen_window
   *
-@@ -2619,9 +2625,9 @@ BOOL clip_fullscreen_window( HWND hwnd, BOOL reset )
+@@ -2617,9 +2623,9 @@ BOOL clip_fullscreen_window( HWND hwnd, BOOL reset )
  {
      struct user_thread_info *thread_info = get_user_thread_info();
      MONITORINFO monitor_info = {.cbSize = sizeof(MONITORINFO)};
@@ -38,7 +38,7 @@ index 77b58b6a503..3c6249d211e 100644
      BOOL ret;
  
      if (hwnd == NtUserGetDesktopWindow()) return FALSE;
-@@ -2633,19 +2639,18 @@ BOOL clip_fullscreen_window( HWND hwnd, BOOL reset )
+@@ -2631,19 +2637,18 @@ BOOL clip_fullscreen_window( HWND hwnd, BOOL reset )
      /* maximized windows don't count as full screen */
      if ((style & WS_MAXIMIZE) && (style & WS_CAPTION) == WS_CAPTION) return FALSE;
  
@@ -65,7 +65,7 @@ index 77b58b6a503..3c6249d211e 100644
      if (!grab_fullscreen)
      {
          if (!EqualRect( &monitor_info.rcMonitor, &virtual_rect )) return FALSE;
-@@ -2657,7 +2662,7 @@ BOOL clip_fullscreen_window( HWND hwnd, BOOL reset )
+@@ -2655,7 +2660,7 @@ BOOL clip_fullscreen_window( HWND hwnd, BOOL reset )
      SERVER_START_REQ( set_cursor )
      {
          req->flags = SET_CURSOR_CLIP | SET_CURSOR_FSCLIP;
@@ -75,7 +75,7 @@ index 77b58b6a503..3c6249d211e 100644
      }
      SERVER_END_REQ;
 diff --git a/dlls/win32u/sysparams.c b/dlls/win32u/sysparams.c
-index 3a0fbe4f87b..2579a9fac03 100644
+index 1b1dc9b601b..de1cbb60139 100644
 --- a/dlls/win32u/sysparams.c
 +++ b/dlls/win32u/sysparams.c
 @@ -2919,32 +2919,6 @@ RECT get_virtual_screen_rect( UINT dpi, MONITOR_DPI_TYPE type )
@@ -112,10 +112,10 @@ index 3a0fbe4f87b..2579a9fac03 100644
  {
      static const WCHAR displayW[] = {'\\','\\','.','\\','D','I','S','P','L','A','Y'};
 diff --git a/dlls/win32u/win32u_private.h b/dlls/win32u/win32u_private.h
-index 5db351836de..63e9c517a1f 100644
+index 1089801b185..ad1ca031c69 100644
 --- a/dlls/win32u/win32u_private.h
 +++ b/dlls/win32u/win32u_private.h
-@@ -168,7 +168,6 @@ extern UINT set_thread_dpi_awareness_context( UINT context );
+@@ -172,7 +172,6 @@ extern UINT set_thread_dpi_awareness_context( UINT context );
  extern UINT get_thread_dpi_awareness_context(void);
  extern RECT get_virtual_screen_rect( UINT dpi, MONITOR_DPI_TYPE type );
  extern BOOL is_exiting_thread( DWORD tid );
@@ -124,5 +124,5 @@ index 5db351836de..63e9c517a1f 100644
  extern RECT map_dpi_rect( RECT rect, UINT dpi_from, UINT dpi_to );
  extern HRGN map_dpi_region( HRGN region, UINT dpi_from, UINT dpi_to );
 -- 
-2.51.2
+2.53.0
 

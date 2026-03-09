@@ -1,4 +1,4 @@
-From af6641cf66e3591dcf26093224704dd55732cf7f Mon Sep 17 00:00:00 2001
+From eb6d3de8e504ca9c50860eea293895750442a237 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 20 Apr 2021 17:55:59 -0500
 Subject: [PATCH 25/44] ntdll: Use server_wait_for_object() when waiting on
@@ -31,5 +31,5 @@ index 400bf3e7e1c..6e3f04c7823 100644
  
      ret = linux_wait_objs( device, count, objs, wait_any, alertable, timeout );
 -- 
-2.51.2
+2.53.0
 

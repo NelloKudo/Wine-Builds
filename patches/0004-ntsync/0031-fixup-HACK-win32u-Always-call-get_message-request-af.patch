@@ -1,4 +1,4 @@
-From af24064e57bfd343611bc1a55c9e90a57376d4a4 Mon Sep 17 00:00:00 2001
+From 5aa48a460d069a0471b3e65900d44cdfe53794d1 Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Mon, 10 Feb 2025 12:55:36 -0800
 Subject: [PATCH 31/44] fixup! HACK: win32u: Always call get_message request
@@ -66,10 +66,10 @@ index 6005c0fa322..4d87e4f02b6 100644
  extern NTSTATUS fsync_close( HANDLE handle );
  
 diff --git a/dlls/win32u/message.c b/dlls/win32u/message.c
-index 9c21660d380..e3273f64544 100644
+index 7e4d09bab3a..35d0ec330db 100644
 --- a/dlls/win32u/message.c
 +++ b/dlls/win32u/message.c
-@@ -2775,6 +2775,16 @@ static BOOL check_queue_bits( UINT wake_mask, UINT changed_mask, UINT signal_bit
+@@ -2782,6 +2782,16 @@ static BOOL check_queue_bits( UINT wake_mask, UINT changed_mask, UINT signal_bit
      return skip;
  }
  
@@ -86,7 +86,7 @@ index 9c21660d380..e3273f64544 100644
  /***********************************************************************
   *           peek_message
   *
-@@ -2822,7 +2832,7 @@ int peek_message( MSG *msg, const struct peek_message_filter *filter )
+@@ -2829,7 +2839,7 @@ int peek_message( MSG *msg, const struct peek_message_filter *filter )
          thread_info->client_info.msg_source = prev_source;
          wake_mask = filter->mask & (QS_SENDMESSAGE | QS_SMRESULT);
  
@@ -96,10 +96,10 @@ index 9c21660d380..e3273f64544 100644
                                &wake_bits, &changed_bits ))
              res = STATUS_PENDING;
 diff --git a/dlls/win32u/win32u_private.h b/dlls/win32u/win32u_private.h
-index 0506b9c1cd1..ecb47468209 100644
+index f6c0cffd4e7..643e43222f3 100644
 --- a/dlls/win32u/win32u_private.h
 +++ b/dlls/win32u/win32u_private.h
-@@ -324,6 +324,9 @@ extern struct client_surface *nulldrv_client_surface_create( HWND hwnd );
+@@ -345,6 +345,9 @@ extern struct client_surface *nulldrv_client_surface_create( HWND hwnd );
  
  extern ULONG_PTR zero_bits;
  
@@ -110,5 +110,5 @@ index 0506b9c1cd1..ecb47468209 100644
  {
      if (status) RtlSetLastWin32Error( RtlNtStatusToDosError( status ));
 -- 
-2.51.2
+2.53.0
 

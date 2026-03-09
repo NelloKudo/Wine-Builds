@@ -1,4 +1,4 @@
-From 06a5a2225310cac0760fb2c4e42d84da675fad9a Mon Sep 17 00:00:00 2001
+From 6ecebe0e1c59c696e5bdf975e981e11050dbe738 Mon Sep 17 00:00:00 2001
 From: Marc-Aurel Zent <mzent@codeweavers.com>
 Date: Thu, 30 Oct 2025 22:02:27 +0100
 Subject: [PATCH 41/44] ntdll: Fix an off-by-one error in the pseudo-handle
@@ -35,5 +35,5 @@ index dce97dbaa49..eb2ac0413e5 100644
      {
          FIXME( "too many allocated handles, not caching %p\n", handle );
 -- 
-2.51.2
+2.53.0
 

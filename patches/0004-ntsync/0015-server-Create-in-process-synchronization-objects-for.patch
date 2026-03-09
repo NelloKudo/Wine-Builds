@@ -1,4 +1,4 @@
-From e553706b066166d1ea4d9c71a6ac755b8d5613f1 Mon Sep 17 00:00:00 2001
+From 255bebcc172414f9eb82613c4edeef7f3312b3b7 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 9 Mar 2021 01:26:35 +0200
 Subject: [PATCH 15/44] server: Create in-process synchronization objects for
@@ -84,5 +84,5 @@ index 867cbbe1f4f..9183d7b4fc5 100644
  
  extern struct thread *current;
 -- 
-2.51.2
+2.53.0
 

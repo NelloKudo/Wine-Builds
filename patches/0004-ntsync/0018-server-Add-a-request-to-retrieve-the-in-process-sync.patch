@@ -1,4 +1,4 @@
-From d2649b2ac2a0d2b074a59714214b65b19ca53614 Mon Sep 17 00:00:00 2001
+From 59dc2667429d93afaa4806b3fa827100b4ad60d9 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Mon, 8 Mar 2021 17:46:06 -0600
 Subject: [PATCH 18/44] server: Add a request to retrieve the in-process
@@ -42,10 +42,10 @@ index 11c0a87d13f..feaa2ad8442 100644
 +#endif
 +}
 diff --git a/server/protocol.def b/server/protocol.def
-index 1769e6218ae..2e3a37f1af2 100644
+index 3b565bcee0f..1fba5a49de4 100644
 --- a/server/protocol.def
 +++ b/server/protocol.def
-@@ -4265,3 +4265,10 @@ enum inproc_sync_type
+@@ -4280,3 +4280,10 @@ enum inproc_sync_type
      INPROC_SYNC_MANUAL_SERVER,
      INPROC_SYNC_QUEUE,
  };
@@ -57,5 +57,5 @@ index 1769e6218ae..2e3a37f1af2 100644
 +    obj_handle_t handle;          /* handle to the device */
 +@END
 -- 
-2.51.2
+2.53.0
 

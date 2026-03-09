@@ -1,7 +1,7 @@
-From 7c5bb8f3d1ec602abdd3dab514f90c219ad5e027 Mon Sep 17 00:00:00 2001
+From 31d056f84ac712f8cef022503c019b6b2cd757f0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Tue, 21 Oct 2025 00:26:52 +0200
-Subject: [PATCH 14/17] winex11: Prevent larger than monitor window resizes.
+Subject: [PATCH 14/35] winex11: Prevent larger than monitor window resizes.
 
 This prevents WMs like KWin or Mutter from automatically maximizing
 windows which frames are larger than their monitor area.
@@ -25,10 +25,10 @@ going to make it fullscreen already anyway.
  4 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/dlls/win32u/window.c b/dlls/win32u/window.c
-index 9981eb6e8b2..16373d2e6e9 100644
+index 74ccf0d2333..d8673749176 100644
 --- a/dlls/win32u/window.c
 +++ b/dlls/win32u/window.c
-@@ -2184,11 +2184,13 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
+@@ -2198,11 +2198,13 @@ static BOOL apply_window_pos( HWND hwnd, HWND insert_after, UINT swp_flags, stru
                  win->flags |= WIN_CHILDREN_MOVED;
          }
  
@@ -43,7 +43,7 @@ index 9981eb6e8b2..16373d2e6e9 100644
          }
      }
 diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
-index a90b9d4769b..3423e71499b 100644
+index f5a9374cb11..16f48c362ae 100644
 --- a/dlls/winex11.drv/window.c
 +++ b/dlls/winex11.drv/window.c
 @@ -463,7 +463,7 @@ static BOOL is_window_managed( HWND hwnd, UINT swp_flags, BOOL fullscreen )
@@ -55,7 +55,7 @@ index a90b9d4769b..3423e71499b 100644
      /* Metacity needs the window to be resizable to make it fullscreen */
      return data->is_fullscreen;
  }
-@@ -3210,6 +3210,7 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
+@@ -3278,6 +3278,7 @@ void X11DRV_WindowPosChanged( HWND hwnd, HWND insert_after, HWND owner_hint, UIN
      was_fullscreen = data->is_fullscreen;
      if (!(new_style & WS_MINIMIZE) || is_virtual_desktop()) data->rects = *new_rects;
      data->is_fullscreen = fullscreen;
@@ -76,10 +76,10 @@ index 8b6c759a580..d6726dccbed 100644
      Pixmap         icon_pixmap;
      Pixmap         icon_mask;
 diff --git a/include/wine/gdi_driver.h b/include/wine/gdi_driver.h
-index 264b5e48206..a88925a90e6 100644
+index 3311be9000f..c026fabca36 100644
 --- a/include/wine/gdi_driver.h
 +++ b/include/wine/gdi_driver.h
-@@ -353,6 +353,7 @@ struct gdi_device_manager
+@@ -346,6 +346,7 @@ struct gdi_device_manager
  
  #define WINE_DM_UNSUPPORTED 0x80000000
  #define WINE_SWP_FULLSCREEN 0x80000000
@@ -88,5 +88,5 @@ index 264b5e48206..a88925a90e6 100644
  struct vulkan_driver_funcs;
  struct opengl_driver_funcs;
 -- 
-2.51.2
+2.53.0
 

@@ -1,4 +1,4 @@
-From 201cf1340b256945f2e83fdc51e7f5bf341b1c61 Mon Sep 17 00:00:00 2001
+From 5982cf0958feea8ca6c7d8ebb6169d476313fdd2 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Thu, 11 Mar 2021 16:45:30 -0600
 Subject: [PATCH 04/44] server: Create in-process synchronization objects for
@@ -186,5 +186,5 @@ index 567a922c0ac..778823394a6 100644
  DECL_HANDLER(create_semaphore)
  {
 -- 
-2.51.2
+2.53.0
 

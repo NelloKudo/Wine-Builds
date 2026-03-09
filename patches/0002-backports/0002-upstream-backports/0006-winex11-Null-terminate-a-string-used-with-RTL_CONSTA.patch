@@ -1,7 +1,7 @@
-From 0092c54b5d6758dd12d133f915dea3fd3af7b507 Mon Sep 17 00:00:00 2001
+From 74b7ada6de99caa78fee14f7a02e0734ab986f3f Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Thu, 30 Oct 2025 19:52:55 -0500
-Subject: [PATCH 06/17] winex11: Null-terminate a string used with
+Subject: [PATCH 06/35] winex11: Null-terminate a string used with
  RTL_CONSTANT_STRING().
 
 ---
@@ -22,5 +22,5 @@ index 039c4b0fefd..ebf16564e70 100644
          surface->hdc_dst = NtGdiOpenDCW( &device_str, NULL, NULL, 0, TRUE, NULL, NULL, NULL );
          surface->hdc_src = NtGdiOpenDCW( &device_str, NULL, NULL, 0, TRUE, NULL, NULL, NULL );
 -- 
-2.51.2
+2.53.0
 

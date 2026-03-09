@@ -1,4 +1,4 @@
-From 46bff90b9054c22646cfcc5ca952053a9587ce74 Mon Sep 17 00:00:00 2001
+From 056698e1cc5f1b0232b83fef1d9250d10d795067 Mon Sep 17 00:00:00 2001
 From: Stelios Tsampas <loathingkernel@gmail.com>
 Date: Mon, 23 Dec 2024 11:31:27 +0200
 Subject: [PATCH 33/44] include: use ntsync.h v7 module header as an in-tree
@@ -14,10 +14,10 @@ Subject: [PATCH 33/44] include: use ntsync.h v7 module header as an in-tree
  create mode 100644 include/ntsync.h
 
 diff --git a/configure.ac b/configure.ac
-index c74236c4362..8a9dd26ea15 100644
+index 37775e1fa7f..dc69e6f75aa 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -684,7 +684,6 @@ AC_CHECK_HEADERS(\
+@@ -687,7 +687,6 @@ AC_CHECK_HEADERS(\
  	linux/input.h \
  	linux/ioctl.h \
  	linux/major.h \
@@ -142,5 +142,5 @@ index a2781ac293c..10a4d0e2538 100644
  struct linux_device
  {
 -- 
-2.51.2
+2.53.0
 

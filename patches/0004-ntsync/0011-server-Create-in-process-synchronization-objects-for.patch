@@ -1,4 +1,4 @@
-From b2274b15f8d04fa038a92a6a17dcc4321588eb34 Mon Sep 17 00:00:00 2001
+From 9ff4b4d17a177e48973a051f14e08af464a61beb Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Mon, 8 Mar 2021 17:13:20 -0600
 Subject: [PATCH 11/44] server: Create in-process synchronization objects for
@@ -71,5 +71,5 @@ index a9dc739a257..ef14582f1e0 100644
  DECL_HANDLER(create_event)
  {
 -- 
-2.51.2
+2.53.0
 

@@ -1,0 +1,221 @@
+From bd6c51f1df4b290fd9d052120fa42356ccf805d5 Mon Sep 17 00:00:00 2001
+From: Torge Matthies <openglfreak@googlemail.com>
+Date: Fri, 6 Mar 2026 02:27:38 +0100
+Subject: [PATCH 28/35] wininet: Switch tracking of cached data to a list of
+ ranges.
+
+---
+ dlls/wininet/http.c     | 96 +++++++++++++++++++++++++++++++++++------
+ dlls/wininet/internet.h | 10 ++++-
+ 2 files changed, 91 insertions(+), 15 deletions(-)
+
+diff --git a/dlls/wininet/http.c b/dlls/wininet/http.c
+index 04a17c78be3..2241c12a436 100644
+--- a/dlls/wininet/http.c
++++ b/dlls/wininet/http.c
+@@ -2436,6 +2436,57 @@ static void commit_cache_entry(http_request_t *req)
+     free(header);
+ }
+ 
++static void mark_range_valid(http_request_t *req, ULONGLONG start, ULONGLONG len)
++{
++    http_downloaded_range_t *entry, *new_entry;
++    ULONGLONG end = start + len;
++
++    TRACE("(%p %I64u %I64u)\n", req, start, end);
++
++    LIST_FOR_EACH_ENTRY(entry, &req->downloaded_ranges, http_downloaded_range_t, entry)
++    {
++        http_downloaded_range_t *next = LIST_ENTRY(entry->entry.next, http_downloaded_range_t, entry);
++
++        if (start >= entry->start && start <= entry->end)
++        {
++            if (end > entry->end)
++                entry->end = end;
++
++            while (&next->entry != &req->downloaded_ranges && next->start <= entry->end)
++            {
++                entry->end = next->end;
++                list_remove(&next->entry);
++                free(next);
++                next = LIST_ENTRY(entry->entry.next, http_downloaded_range_t, entry);
++            }
++
++            return;
++        }
++        else if (&next->entry != &req->downloaded_ranges && start < next->start)
++            break;
++    }
++
++    new_entry = calloc(1, sizeof(*new_entry));
++    list_init(&new_entry->entry);
++    new_entry->start = start;
++    new_entry->end = end;
++    list_add_before(&entry->entry, &new_entry->entry);
++}
++
++static ULONGLONG find_range_end(http_request_t *req, ULONGLONG pos)
++{
++    http_downloaded_range_t *entry;
++
++    LIST_FOR_EACH_ENTRY(entry, &req->downloaded_ranges, http_downloaded_range_t, entry)
++    {
++        if (entry->start <= pos && entry->end >= pos)
++            return entry->end;
++        if (entry->start > pos)
++            break;
++    }
++    return 0;
++}
++
+ static void write_cache_file(http_request_t *req, const BYTE *buf, DWORD len)
+ {
+     if(!req->hCacheFile) {
+@@ -2445,15 +2496,24 @@ static void write_cache_file(http_request_t *req, const BYTE *buf, DWORD len)
+     if(len) {
+         BOOL bres;
+         DWORD written;
++        OVERLAPPED ovl = {0};
+ 
+-        bres = WriteFile(req->hCacheFile, buf, len, &written, NULL);
++        ovl.Internal = -1;
++        ovl.InternalHigh = -1;
++        ovl.Offset = (DWORD)req->file_pos;
++        ovl.OffsetHigh = (DWORD)(req->file_pos >> 32);
++        bres = WriteFile(req->hCacheFile, buf, len, &written, &ovl);
+         if(bres)
+-            req->cache_size += written;
++        {
++            mark_range_valid(req, req->file_pos, written);
++            req->file_pos += len;
++        }
+         else
+             FIXME("WriteFile failed: %lu\n", GetLastError());
+     }
+ 
+-    if(req->data_stream->vtbl->end_of_data(req->data_stream, req))
++    if(req->data_stream->vtbl->end_of_data(req->data_stream, req)
++        && find_range_end(req, 0) >= req->file_pos)
+         commit_cache_entry(req);
+ }
+ 
+@@ -2532,7 +2592,8 @@ static void create_cache_entry(http_request_t *req)
+     create_req_file(file_name, &req->req_file);
+     req->req_file->url = url;
+     req->content_pos = 0;
+-    req->cache_size = 0;
++    req->file_pos = 0;
++    list_init(&req->downloaded_ranges);
+ 
+     req->hCacheFile = CreateFileW(file_name, GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+               NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+@@ -3051,13 +3112,14 @@ static DWORD read_req_file(http_request_t *req, BYTE *buffer, DWORD size, DWORD
+     DWORD ret_read = 0, res;
+     LARGE_INTEGER off;
+     BYTE buf[1024];
++    ULONGLONG end;
+ 
+-    while (req->content_pos > req->cache_size) {
+-        res = read_http_stream(req, (BYTE*)buf, min(sizeof(buf), req->content_pos - req->cache_size),
++    while (req->content_pos > find_range_end(req, req->content_pos)) {
++        res = read_http_stream(req, (BYTE*)buf, min(sizeof(buf), req->content_pos - req->file_pos),
+                                &ret_read, allow_blocking);
+         if (res != ERROR_SUCCESS)
+             return res;
+-        if (!ret_read && req->content_pos > req->cache_size) {
++        if (!ret_read && req->content_pos > req->contentLength) {
+             req->state = ERROR_INTERNET_INCORRECT_HANDLE_STATE;
+             *read = 0;
+             return ERROR_NOACCESS;
+@@ -3068,13 +3130,16 @@ static DWORD read_req_file(http_request_t *req, BYTE *buffer, DWORD size, DWORD
+         }
+     }
+ 
+-    if (req->content_pos < req->cache_size) {
++    end = find_range_end(req, req->content_pos);
++    if (req->content_pos < end) {
++        if (size > end - req->content_pos)
++            size = end - req->content_pos;
+         off.QuadPart = req->content_pos;
+         if (!SetFilePointerEx(req->req_file->file_handle, off, NULL, FILE_BEGIN))
+             return GetLastError();
+         if (!ReadFile(req->req_file->file_handle, buffer, size, &ret_read, NULL))
+             return GetLastError();
+-    } else if (req->content_pos > req->cache_size) {
++    } else if (req->content_pos > req->contentLength) {
+         req->state = ERROR_INTERNET_INCORRECT_HANDLE_STATE;
+         *read = 0;
+         return ERROR_NOACCESS;
+@@ -3163,10 +3228,10 @@ static void async_read_file_proc(task_header_t *hdr)
+     if(req->req_file && req->req_file->file_handle) {
+         DWORD ret, ret_read;
+         BYTE buf[1024];
+-        while (req->content_pos > req->cache_size) {
+-            ret = read_http_stream(req, (BYTE*)buf, min(sizeof(buf), req->content_pos - req->cache_size),
++        while (req->content_pos > req->file_pos) {
++            ret = read_http_stream(req, (BYTE*)buf, min(sizeof(buf), req->content_pos - req->file_pos),
+                                    &ret_read, TRUE);
+-            if (!ret_read && req->content_pos > req->cache_size) {
++            if (!ret_read && req->content_pos > req->contentLength) {
+                 req->state = ERROR_INTERNET_INCORRECT_HANDLE_STATE;
+                 if(task->ret_read)
+                     *task->ret_read = 0;
+@@ -3377,6 +3442,7 @@ static DWORD HTTPREQ_QueryDataAvailable(object_header_t *hdr, DWORD *available,
+     http_request_t *req = (http_request_t*)hdr;
+     DWORD res = ERROR_SUCCESS, avail = 0, error = ERROR_SUCCESS;
+     BOOL allow_blocking, notify_received = FALSE;
++    ULONGLONG range_end;
+ 
+     TRACE("(%p %p %lx %Ix)\n", req, available, flags, ctx);
+ 
+@@ -3399,8 +3465,9 @@ static DWORD HTTPREQ_QueryDataAvailable(object_header_t *hdr, DWORD *available,
+         }
+ 
+         avail = req->read_size;
+-        if(req->cache_size > req->content_pos)
+-            avail = max(avail, req->cache_size - req->content_pos);
++        range_end = find_range_end(req, req->content_pos);
++        if(range_end > req->content_pos)
++            avail = max(avail, range_end - req->content_pos);
+ 
+         if(!avail && !end_of_read_data(req)) {
+             LeaveCriticalSection(&req->read_section);
+@@ -3491,6 +3558,7 @@ static DWORD HTTP_HttpOpenRequestW(http_session_t *session,
+     request->hdr.dwFlags = dwFlags;
+     request->hdr.dwContext = dwContext;
+     request->hdr.decoding = session->hdr.decoding;
++    list_init(&request->downloaded_ranges);
+     request->contentLength = ~0;
+ 
+     request->netconn_stream.data_stream.vtbl = &netconn_stream_vtbl;
+diff --git a/dlls/wininet/internet.h b/dlls/wininet/internet.h
+index 0e867529232..5634dcefe92 100644
+--- a/dlls/wininet/internet.h
++++ b/dlls/wininet/internet.h
+@@ -307,6 +307,13 @@ typedef struct {
+ 
+ #define READ_BUFFER_SIZE 8192
+ 
++typedef struct
++{
++    struct list entry;
++    ULONGLONG start;
++    ULONGLONG end;
++} http_downloaded_range_t;
++
+ typedef struct
+ {
+     object_header_t hdr;
+@@ -331,7 +338,8 @@ typedef struct
+ 
+     FILETIME last_modified;
+     HANDLE hCacheFile;
+-    ULONGLONG cache_size;  /* size of cached data */
++    ULONGLONG file_pos;
++    struct list downloaded_ranges;
+     req_file_t *req_file;
+     FILETIME expires;
+     struct HttpAuthInfo *authInfo;
+-- 
+2.53.0
+

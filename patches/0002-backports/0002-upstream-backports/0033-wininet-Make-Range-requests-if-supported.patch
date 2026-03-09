@@ -1,0 +1,80 @@
+From db54d321bf382145fdcf61c89f4eb3dac454cc35 Mon Sep 17 00:00:00 2001
+From: Torge Matthies <openglfreak@googlemail.com>
+Date: Fri, 6 Mar 2026 02:27:39 +0100
+Subject: [PATCH 33/35] wininet: Make Range-requests if supported.
+
+---
+ dlls/wininet/http.c     | 15 ++++++++++++---
+ dlls/wininet/internet.h |  1 +
+ 2 files changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/dlls/wininet/http.c b/dlls/wininet/http.c
+index 572cfd63390..2d3887fb86d 100644
+--- a/dlls/wininet/http.c
++++ b/dlls/wininet/http.c
+@@ -5170,8 +5170,8 @@ static DWORD create_request(http_request_t *request, void *optional, DWORD optle
+ 
+     do
+     {
++        BOOL reusing_connection, have_range;
+         DWORD len, data_len = optlen;
+-        BOOL reusing_connection;
+         char *ascii_req;
+ 
+         loop_next = FALSE;
+@@ -5233,7 +5233,8 @@ static DWORD create_request(http_request_t *request, void *optional, DWORD optle
+         else if (request->proxy && !(request->hdr.dwFlags & INTERNET_FLAG_SECURE))
+         {
+             WCHAR *url = build_proxy_path_url(request);
+-            request_header = build_request_header(request, request->verb, url, request->version, TRUE, FALSE);
++            request_header = build_request_header(request, request->verb, url, request->version, TRUE,
++                                                  !request->range_hdr_not_supported);
+             free(url);
+         }
+         else
+@@ -5241,7 +5242,8 @@ static DWORD create_request(http_request_t *request, void *optional, DWORD optle
+             if (request->proxy && HTTP_GetCustomHeaderIndex(request, L"Content-Length", 0, TRUE) >= 0)
+                 set_content_length_header(request, content_length, HTTP_ADDREQ_FLAG_REPLACE);
+ 
+-            request_header = build_request_header(request, request->verb, request->path, request->version, TRUE, FALSE);
++            request_header = build_request_header(request, request->verb, request->path, request->version, TRUE,
++                                                  !request->range_hdr_not_supported);
+         }
+ 
+         TRACE("Request header -> %s\n", debugstr_w(request_header) );
+@@ -5251,6 +5253,7 @@ static DWORD create_request(http_request_t *request, void *optional, DWORD optle
+             data_len = 0;
+ 
+         ascii_req = build_ascii_request(request_header, optional, data_len, &len);
++        have_range = !!wcsstr(request_header, L"\r\nRange: bytes=");
+         free(request_header);
+         TRACE("full request -> %s\n", debugstr_a(ascii_req) );
+ 
+@@ -5421,6 +5424,12 @@ static DWORD create_request(http_request_t *request, void *optional, DWORD optle
+                 secure_proxy_connect = FALSE;
+                 loop_next = TRUE;
+             }
++            if (have_range && (request->status_code == HTTP_STATUS_BAD_REQUEST || request->status_code == 416))
++            {
++                request->range_hdr_not_supported = TRUE;
++                http_release_netconn( request, FALSE );
++                loop_next = TRUE;
++            }
+         }
+         else
+             res = ERROR_SUCCESS;
+diff --git a/dlls/wininet/internet.h b/dlls/wininet/internet.h
+index e397fc96da8..71d8fd4724e 100644
+--- a/dlls/wininet/internet.h
++++ b/dlls/wininet/internet.h
+@@ -345,6 +345,7 @@ typedef struct
+     ULONGLONG range_start;
+     ULONGLONG range_end;
+     WCHAR range_hdr_value[42];
++    BOOL range_hdr_not_supported;
+     WCHAR content_range[70];
+     FILETIME expires;
+     struct HttpAuthInfo *authInfo;
+-- 
+2.53.0
+

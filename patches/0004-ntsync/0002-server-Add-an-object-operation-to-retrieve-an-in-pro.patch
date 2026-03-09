@@ -1,4 +1,4 @@
-From 3139435185b1702f94f6fa893026c7fa463913f0 Mon Sep 17 00:00:00 2001
+From eb7f8011536e7fc86e7d49e249fa5c1cec422380 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Mon, 8 Mar 2021 22:31:06 +0200
 Subject: [PATCH 02/44] server: Add an object operation to retrieve an
@@ -65,10 +65,10 @@ index fbeced2131f..53a639fc776 100644
      iosb_destroy              /* destroy */
  };
 diff --git a/server/atom.c b/server/atom.c
-index bc68d6ac0e9..a0d5d7a5c19 100644
+index 4a07ce084fc..96638e5dcbf 100644
 --- a/server/atom.c
 +++ b/server/atom.c
-@@ -92,6 +92,7 @@ static const struct object_ops atom_table_ops =
+@@ -91,6 +91,7 @@ static const struct object_ops atom_table_ops =
      NULL,                         /* unlink_name */
      no_open_file,                 /* open_file */
      no_kernel_obj_list,           /* get_kernel_obj_list */
@@ -289,10 +289,10 @@ index be120695e6e..e6c86472c71 100644
      no_destroy                   /* destroy */
  };
 diff --git a/server/fd.c b/server/fd.c
-index eb3936d409a..a78360be754 100644
+index d7bd684456c..abe29866f57 100644
 --- a/server/fd.c
 +++ b/server/fd.c
-@@ -185,6 +185,7 @@ static const struct object_ops fd_ops =
+@@ -190,6 +190,7 @@ static const struct object_ops fd_ops =
      NULL,                     /* unlink_name */
      no_open_file,             /* open_file */
      no_kernel_obj_list,       /* get_kernel_obj_list */
@@ -300,7 +300,7 @@ index eb3936d409a..a78360be754 100644
      no_close_handle,          /* close_handle */
      fd_destroy                /* destroy */
  };
-@@ -228,6 +229,7 @@ static const struct object_ops device_ops =
+@@ -233,6 +234,7 @@ static const struct object_ops device_ops =
      NULL,                     /* unlink_name */
      no_open_file,             /* open_file */
      no_kernel_obj_list,       /* get_kernel_obj_list */
@@ -308,7 +308,7 @@ index eb3936d409a..a78360be754 100644
      no_close_handle,          /* close_handle */
      device_destroy            /* destroy */
  };
-@@ -270,6 +272,7 @@ static const struct object_ops inode_ops =
+@@ -275,6 +277,7 @@ static const struct object_ops inode_ops =
      NULL,                     /* unlink_name */
      no_open_file,             /* open_file */
      no_kernel_obj_list,       /* get_kernel_obj_list */
@@ -316,7 +316,7 @@ index eb3936d409a..a78360be754 100644
      no_close_handle,          /* close_handle */
      inode_destroy             /* destroy */
  };
-@@ -314,6 +317,7 @@ static const struct object_ops file_lock_ops =
+@@ -319,6 +322,7 @@ static const struct object_ops file_lock_ops =
      NULL,                       /* unlink_name */
      no_open_file,               /* open_file */
      no_kernel_obj_list,         /* get_kernel_obj_list */
@@ -325,7 +325,7 @@ index eb3936d409a..a78360be754 100644
      no_destroy                  /* destroy */
  };
 diff --git a/server/file.c b/server/file.c
-index 627da2a771c..a402ee916e6 100644
+index f5a5d12da19..83c3d2039b0 100644
 --- a/server/file.c
 +++ b/server/file.c
 @@ -137,6 +137,7 @@ static const struct object_ops file_ops =
@@ -566,7 +566,7 @@ index 8581152c2bd..2f05da81ae8 100644
  
  int get_serial_async_timeout(struct object *obj, int type, int count);
 diff --git a/server/process.c b/server/process.c
-index 98207c24af2..0044c54546b 100644
+index 9ec078c119c..876fe604b45 100644
 --- a/server/process.c
 +++ b/server/process.c
 @@ -124,6 +124,7 @@ static const struct object_ops process_ops =
@@ -594,10 +594,10 @@ index 98207c24af2..0044c54546b 100644
      job_destroy                    /* destroy */
  };
 diff --git a/server/protocol.def b/server/protocol.def
-index 6f428aa543c..1769e6218ae 100644
+index 9afb15a349d..3b565bcee0f 100644
 --- a/server/protocol.def
 +++ b/server/protocol.def
-@@ -4253,3 +4253,15 @@ enum fsync_type
+@@ -4268,3 +4268,15 @@ enum fsync_type
      unsigned int shm_idx;
  @REPLY
  @END
@@ -694,10 +694,10 @@ index 802b7f936b9..2f58105452f 100644
      handler_destroy           /* destroy */
  };
 diff --git a/server/sock.c b/server/sock.c
-index 8ad3f831216..87bd679a592 100644
+index 16d26469fdf..2587f4db4fe 100644
 --- a/server/sock.c
 +++ b/server/sock.c
-@@ -500,6 +500,7 @@ static const struct object_ops sock_ops =
+@@ -505,6 +505,7 @@ static const struct object_ops sock_ops =
      NULL,                         /* unlink_name */
      no_open_file,                 /* open_file */
      no_kernel_obj_list,           /* get_kernel_obj_list */
@@ -705,7 +705,7 @@ index 8ad3f831216..87bd679a592 100644
      sock_close_handle,            /* close_handle */
      sock_destroy                  /* destroy */
  };
-@@ -3721,6 +3722,7 @@ static const struct object_ops ifchange_ops =
+@@ -3909,6 +3910,7 @@ static const struct object_ops ifchange_ops =
      NULL,                    /* unlink_name */
      no_open_file,            /* open_file */
      no_kernel_obj_list,      /* get_kernel_obj_list */
@@ -713,7 +713,7 @@ index 8ad3f831216..87bd679a592 100644
      no_close_handle,         /* close_handle */
      ifchange_destroy         /* destroy */
  };
-@@ -3944,6 +3946,7 @@ static const struct object_ops socket_device_ops =
+@@ -4132,6 +4134,7 @@ static const struct object_ops socket_device_ops =
      default_unlink_name,        /* unlink_name */
      socket_device_open_file,    /* open_file */
      no_kernel_obj_list,         /* get_kernel_obj_list */
@@ -786,7 +786,7 @@ index a0e35cb29bf..e9641e252b0 100644
      token_destroy              /* destroy */
  };
 diff --git a/server/window.c b/server/window.c
-index e2f10a41d0b..73a77e1ccfd 100644
+index 1a77702fd9c..694ad8c4b34 100644
 --- a/server/window.c
 +++ b/server/window.c
 @@ -122,6 +122,7 @@ static const struct object_ops window_ops =
@@ -818,5 +818,5 @@ index 8e0846fbb17..115de169c81 100644
      desktop_destroy               /* destroy */
  };
 -- 
-2.51.2
+2.53.0
 

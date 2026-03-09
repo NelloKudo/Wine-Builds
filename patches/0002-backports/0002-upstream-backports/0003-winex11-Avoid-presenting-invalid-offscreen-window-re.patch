@@ -1,7 +1,7 @@
-From 2d8ae9723cacee92bf5dda7a6fe4269e1f0c0486 Mon Sep 17 00:00:00 2001
+From 27fdedeb5ec7f96fd3875fe14e2470b7b980e87e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Sat, 20 Sep 2025 18:21:35 +0200
-Subject: [PATCH 03/17] winex11: Avoid presenting invalid offscreen window
+Subject: [PATCH 03/35] winex11: Avoid presenting invalid offscreen window
  rects.
 
 ---
@@ -61,5 +61,5 @@ index c9854c1dbda..039c4b0fefd 100644
      TRACE( "Created %s for client window %lx\n", debugstr_client_surface( &surface->client ), surface->window );
      *client = &surface->client;
 -- 
-2.51.2
+2.53.0
 

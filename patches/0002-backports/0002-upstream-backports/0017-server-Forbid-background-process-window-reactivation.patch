@@ -1,7 +1,7 @@
-From 5d13bf10c07ff46f8094956c382e804039218db6 Mon Sep 17 00:00:00 2001
+From 6e80835fb25636a2ad4c11b4913efd6eee3de09e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Sun, 16 Nov 2025 15:51:46 +0100
-Subject: [PATCH 17/17] server: Forbid background process window reactivation.
+Subject: [PATCH 17/35] server: Forbid background process window reactivation.
 
 Pegasus Mail posts a WM_USER + 8991 message to its own window when it
 loses focus, then calls SetFocus on its window when processing this
@@ -40,7 +40,7 @@ Wine-Bug: https://bugs.winehq.org/show_bug.cgi?id=58167
  4 files changed, 45 insertions(+), 3 deletions(-)
 
 diff --git a/server/process.c b/server/process.c
-index b06ec608850..2d11a1766ad 100644
+index c4c95003adc..6b60dcd17b1 100644
 --- a/server/process.c
 +++ b/server/process.c
 @@ -669,6 +669,7 @@ struct process *create_process( int fd, struct process *parent, unsigned int fla
@@ -52,7 +52,7 @@ index b06ec608850..2d11a1766ad 100644
      process->image           = NULL;
      process->job             = NULL;
 diff --git a/server/process.h b/server/process.h
-index 0023ce23671..bbbc04352bc 100644
+index 4172a03b072..0a75ac0cf44 100644
 --- a/server/process.h
 +++ b/server/process.h
 @@ -62,6 +62,7 @@ struct process
@@ -185,5 +185,5 @@ index 9ff8a8fd167..df8588c00f9 100644
          reply->locator = get_shared_object_locator( new_desktop->shared );
      }
 -- 
-2.51.2
+2.53.0
 

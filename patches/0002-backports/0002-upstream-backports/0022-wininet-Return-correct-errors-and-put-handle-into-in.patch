@@ -1,0 +1,140 @@
+From 6ed7956865d4eab9dd1feb6c7ddeb728fc80c7a4 Mon Sep 17 00:00:00 2001
+From: Torge Matthies <openglfreak@googlemail.com>
+Date: Tue, 17 Feb 2026 10:41:42 +0100
+Subject: [PATCH 22/35] wininet: Return correct errors and put handle into
+ invalid state when seeking beyond end of file.
+
+---
+ dlls/wininet/http.c       | 32 ++++++++++++++++++++++++++++++--
+ dlls/wininet/tests/http.c |  8 --------
+ 2 files changed, 30 insertions(+), 10 deletions(-)
+
+diff --git a/dlls/wininet/http.c b/dlls/wininet/http.c
+index f60aa4534fb..962e093b098 100644
+--- a/dlls/wininet/http.c
++++ b/dlls/wininet/http.c
+@@ -3062,6 +3062,11 @@ static DWORD read_req_file(http_request_t *req, BYTE *buffer, DWORD size, DWORD
+                                &ret_read, allow_blocking);
+         if (res != ERROR_SUCCESS)
+             return res;
++        if (!ret_read && req->content_pos > req->cache_size) {
++            req->state = ERROR_INTERNET_INCORRECT_HANDLE_STATE;
++            *read = 0;
++            return ERROR_NOACCESS;
++        }
+         if (!ret_read) {
+             *read = 0;
+             return ERROR_SUCCESS;
+@@ -3074,6 +3079,10 @@ static DWORD read_req_file(http_request_t *req, BYTE *buffer, DWORD size, DWORD
+             return GetLastError();
+         if (!ReadFile(req->req_file->file_handle, buffer, size, &ret_read, NULL))
+             return GetLastError();
++    } else if (req->content_pos > req->cache_size) {
++        req->state = ERROR_INTERNET_INCORRECT_HANDLE_STATE;
++        *read = 0;
++        return ERROR_NOACCESS;
+     }
+ 
+     *read = ret_read;
+@@ -3162,6 +3171,13 @@ static void async_read_file_proc(task_header_t *hdr)
+         while (req->content_pos > req->cache_size) {
+             ret = read_http_stream(req, (BYTE*)buf, min(sizeof(buf), req->content_pos - req->cache_size),
+                                    &ret_read, TRUE);
++            if (!ret_read && req->content_pos > req->cache_size) {
++                req->state = ERROR_INTERNET_INCORRECT_HANDLE_STATE;
++                if(task->ret_read)
++                    *task->ret_read = 0;
++                send_request_complete(req, FALSE, ERROR_NOACCESS);
++                return;
++            }
+             if(ret != ERROR_SUCCESS || !ret_read)
+                 break;
+         }
+@@ -3228,6 +3244,12 @@ static DWORD HTTPREQ_SetFilePointer(object_header_t *hdr, LONG lDistanceToMove,
+ 
+     EnterCriticalSection(&req->read_section);
+ 
++    if (req->state != ERROR_SUCCESS) {
++        LeaveCriticalSection(&req->read_section);
++        SetLastError(ERROR_INTERNET_INVALID_OPERATION);
++        return INVALID_SET_FILE_POINTER;
++    }
++
+     switch (dwMoveContext) {
+         case FILE_BEGIN:
+             res = lDistanceToMove;
+@@ -3278,8 +3300,10 @@ static DWORD HTTPREQ_ReadFile(object_header_t *hdr, void *buf, DWORD size, DWORD
+             req->state = INTERNET_HANDLE_IN_USE;
+         else if(req->state == INTERNET_HANDLE_IN_USE)
+             req->state = ERROR_INTERNET_INTERNAL_ERROR;
++        else
++            res = req->state;
+ 
+-        if(req->read_size) {
++        if(res == ERROR_SUCCESS && req->read_size) {
+             read = min(size, req->read_size);
+             memcpy(buf, req->read_buf + req->read_pos, read);
+             req->read_size -= read;
+@@ -3287,7 +3311,7 @@ static DWORD HTTPREQ_ReadFile(object_header_t *hdr, void *buf, DWORD size, DWORD
+             req->content_pos += read;
+         }
+ 
+-        if(read < size && req->req_file && req->req_file->file_handle) {
++        if(res == ERROR_SUCCESS && read < size && req->req_file && req->req_file->file_handle) {
+             res = read_req_file(req, (BYTE*)buf + read, size - read, &cread, allow_blocking);
+             if(res == ERROR_SUCCESS) {
+                 read += cread;
+@@ -3374,6 +3398,10 @@ static DWORD HTTPREQ_QueryDataAvailable(object_header_t *hdr, DWORD *available,
+             req->state = INTERNET_HANDLE_IN_USE;
+         else if(req->state == INTERNET_HANDLE_IN_USE)
+             req->state = ERROR_INTERNET_INTERNAL_ERROR;
++        else {
++            LeaveCriticalSection( &req->read_section );
++            return req->state;
++        }
+ 
+         avail = req->read_size;
+         if(req->cache_size > req->content_pos)
+diff --git a/dlls/wininet/tests/http.c b/dlls/wininet/tests/http.c
+index df81651b942..c07af88d9ad 100644
+--- a/dlls/wininet/tests/http.c
++++ b/dlls/wininet/tests/http.c
+@@ -893,35 +893,27 @@ static void InternetSetFilePointer_test(const char *host, const char *path)
+     SetLastError(0xdeadbeef);
+     res = InternetReadFile(hor, buf, 1024, &count);
+     err = !res ? GetLastError() : NO_ERROR;
+-    todo_wine
+     ok(!res, "InternetReadFile succeeded unexpectedly\n");
+-    todo_wine
+     ok(err == ERROR_NOACCESS, "InternetReadFile unexpected error %lu\n", err);
+ 
+     SetLastError(0xdeadbeef);
+     res = InternetReadFile(hor, buf, 1024, &count);
+     err = !res ? GetLastError() : NO_ERROR;
+-    todo_wine
+     ok(!res, "InternetReadFile succeeded unexpectedly\n");
+-    todo_wine
+     ok(err == ERROR_INTERNET_INCORRECT_HANDLE_STATE, "InternetReadFile unexpected error %lu\n", err);
+ 
+     SetLastError(0xdeadbeef);
+     pos = InternetSetFilePointer(hor, 0, NULL, FILE_BEGIN, 0);
+     err = pos == INVALID_SET_FILE_POINTER ? GetLastError() : NO_ERROR;
+     expected = pos == INVALID_SET_FILE_POINTER && err == ERROR_INTERNET_INVALID_OPERATION;
+-    todo_wine
+     ok(expected, "Expected position %#x. Got %#lx. GetLastError() %lu\n", INVALID_SET_FILE_POINTER, pos, err);
+ 
+     count = 0;
+     SetLastError(0xdeadbeef);
+     res = InternetQueryDataAvailable(hor, &count, 0x0, 0x0);
+     err = !res ? GetLastError() : NO_ERROR;
+-    todo_wine
+     ok(!res, "InternetQueryDataAvailable succeeded unexpectedly\n");
+-    todo_wine
+     ok(err == ERROR_INTERNET_INCORRECT_HANDLE_STATE, "InternetQueryDataAvailable unexpected error %lu\n", err);
+-    todo_wine
+     ok(count == 0, "InternetQueryDataAvailable unexpected count: %lu\n", count);
+ 
+     size = ARRAY_SIZE(buf);
+-- 
+2.53.0
+

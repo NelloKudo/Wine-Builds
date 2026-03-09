@@ -1,4 +1,4 @@
-From e32087b826ff9b280af0b8a327fcca5cbd11a127 Mon Sep 17 00:00:00 2001
+From 44bbd8b5c73881b6974a31e67f2857c8e8dc37f8 Mon Sep 17 00:00:00 2001
 From: winebuild <wine@build.dev>
 Date: Mon, 21 Jul 2025 03:08:33 +0200
 Subject: [PATCH 38/44] loader: move NTsync logging after sync message
@@ -10,10 +10,10 @@ it being the first sync method mentioned in logs.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
-index fa1a3dbe056..1e128d659e8 100644
+index e5bd2f8bd5d..9a757709980 100644
 --- a/dlls/ntdll/loader.c
 +++ b/dlls/ntdll/loader.c
-@@ -4607,8 +4607,6 @@ void loader_init( CONTEXT *context, void **entry )
+@@ -4653,8 +4653,6 @@ void loader_init( CONTEXT *context, void **entry )
              if (FIXME_ON(sync))
              {
                  NTSTATUS sync = __wine_get_sync_type();
@@ -22,7 +22,7 @@ index fa1a3dbe056..1e128d659e8 100644
                  switch (abs(sync))
                  {
                  case 1:
-@@ -4624,6 +4622,8 @@ void loader_init( CONTEXT *context, void **entry )
+@@ -4670,6 +4668,8 @@ void loader_init( CONTEXT *context, void **entry )
                      MESSAGE("wineserver: using server-side synchronization.\n");
                      break;
                  }
@@ -32,5 +32,5 @@ index fa1a3dbe056..1e128d659e8 100644
              if (FIXME_ON(winediag))
                  MESSAGE("winediag: this wine %s contains many experimental patches, please don't report bugs to winehq.org.\n", wine_get_version());
 -- 
-2.51.2
+2.53.0
 

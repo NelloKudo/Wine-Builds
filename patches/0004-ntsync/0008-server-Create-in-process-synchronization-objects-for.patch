@@ -1,4 +1,4 @@
-From c71d85d7d147a57d66788947d1e183ff9815eed9 Mon Sep 17 00:00:00 2001
+From 237bc8910ba147daeeae9d758508fea922568f7c Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 9 Mar 2021 01:00:51 +0200
 Subject: [PATCH 08/44] server: Create in-process synchronization objects for
@@ -106,5 +106,5 @@ index 3d4d5e6ebab..a40c282a32f 100644
      release_object( server );
  }
 -- 
-2.51.2
+2.53.0
 

@@ -1,4 +1,4 @@
-From 6abc37658d8a7161ec7d8c3d54674745b2539eff Mon Sep 17 00:00:00 2001
+From 41c9fa7ee785949e5f9cb1d8405054dce22cd4d3 Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Fri, 28 Feb 2025 22:55:27 -0800
 Subject: [PATCH 35/44] server, ntdll: Add a do_ntsync helper.
@@ -95,10 +95,10 @@ index 824725bd64c..7fdf400b3e3 100644
  
  
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index 98e7c206ab8..f9d7879122c 100644
+index 3232e43fc44..6927de37ef9 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
-@@ -399,6 +399,7 @@ extern NTSTATUS wow64_wine_spawnvp( void *args );
+@@ -400,6 +400,7 @@ extern NTSTATUS wow64_wine_spawnvp( void *args );
  extern void dbg_init(void);
  
  extern void close_inproc_sync_obj( HANDLE handle );
@@ -276,5 +276,5 @@ index b505b2ed9e6..364d88d4afe 100644
  extern struct inproc_sync *no_get_inproc_sync( struct object *obj );
  
 -- 
-2.51.2
+2.53.0
 

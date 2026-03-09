@@ -1,4 +1,4 @@
-From 8c65e828c3756d6a2e0d80f8a7579ab802e5bb1a Mon Sep 17 00:00:00 2001
+From a71197b8fc5a919195e961ea531eb2f204c47d15 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Tue, 9 Mar 2021 19:32:25 +0200
 Subject: [PATCH 20/44] server: Introduce select_inproc_queue and
@@ -10,10 +10,10 @@ Subject: [PATCH 20/44] server: Introduce select_inproc_queue and
  2 files changed, 55 insertions(+)
 
 diff --git a/server/protocol.def b/server/protocol.def
-index 76a8a076570..41eef11bbcb 100644
+index db13a19699a..22a6b8df568 100644
 --- a/server/protocol.def
 +++ b/server/protocol.def
-@@ -4282,3 +4282,14 @@ enum inproc_sync_type
+@@ -4297,3 +4297,14 @@ enum inproc_sync_type
      int          type;            /* object type */
      unsigned int access;          /* handle access rights */
  @END
@@ -105,5 +105,5 @@ index f26d8c09269..e1be4187926 100644
  {
      struct desktop *desktop;
 -- 
-2.51.2
+2.53.0
 

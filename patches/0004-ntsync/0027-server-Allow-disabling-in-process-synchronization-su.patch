@@ -1,4 +1,4 @@
-From 52627df15bac92bde9d46043f57cc23dfe162692 Mon Sep 17 00:00:00 2001
+From e79fe1c88a9a6b05eb8ed0b9f8dcfd466d45bce1 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Sat, 13 Mar 2021 16:20:30 -0600
 Subject: [PATCH 27/44] server: Allow disabling in-process synchronization
@@ -26,5 +26,5 @@ index 6cb02b16832..fb9d2442c02 100644
          return (struct linux_device *)grab_object( linux_device_object );
  
 -- 
-2.51.2
+2.53.0
 

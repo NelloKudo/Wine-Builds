@@ -1,4 +1,4 @@
-From 94a8f42af7b7caf15d1713eb1ee74871da44da72 Mon Sep 17 00:00:00 2001
+From 4499aeefa9b2e301d6f4e4056cbc20ee494292f7 Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Mon, 8 Mar 2021 17:17:35 -0600
 Subject: [PATCH 13/44] server: Create in-process synchronization objects for
@@ -9,7 +9,7 @@ Subject: [PATCH 13/44] server: Create in-process synchronization objects for
  1 file changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/server/process.c b/server/process.c
-index 7c8fbb6a8a5..da69f77fbb3 100644
+index 1eb43a42cbe..547575bfeb3 100644
 --- a/server/process.c
 +++ b/server/process.c
 @@ -202,6 +202,7 @@ struct type_descr job_type =
@@ -73,5 +73,5 @@ index 7c8fbb6a8a5..da69f77fbb3 100644
  
  static void job_dump( struct object *obj, int verbose )
 -- 
-2.51.2
+2.53.0
 

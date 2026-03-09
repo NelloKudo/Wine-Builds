@@ -1,4 +1,4 @@
-From c7cb43ffda34daab1e7caff161f9ac85c5891128 Mon Sep 17 00:00:00 2001
+From 70fcfdf1102677860512666534cd843c2d99d18d Mon Sep 17 00:00:00 2001
 From: Elizabeth Figura <zfigura@codeweavers.com>
 Date: Fri, 12 Mar 2021 23:04:17 +0200
 Subject: [PATCH 26/44] ntdll: Cache in-process synchronization objects.
@@ -306,7 +306,7 @@ index 6e3f04c7823..be1520de0ac 100644
  {
      return STATUS_NOT_IMPLEMENTED;
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index 9b30aa2595e..98e7c206ab8 100644
+index 4a463c0b6f2..3232e43fc44 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
 @@ -227,6 +227,8 @@ extern NTSTATUS load_start_exe( UNICODE_STRING *nt_name, void **module );
@@ -318,7 +318,7 @@ index 9b30aa2595e..98e7c206ab8 100644
  extern unsigned int server_call_unlocked( void *req_ptr );
  extern void server_enter_uninterrupted_section( pthread_mutex_t *mutex, sigset_t *sigset );
  extern void server_leave_uninterrupted_section( pthread_mutex_t *mutex, sigset_t *sigset );
-@@ -396,6 +398,8 @@ extern NTSTATUS wow64_wine_spawnvp( void *args );
+@@ -397,6 +399,8 @@ extern NTSTATUS wow64_wine_spawnvp( void *args );
  
  extern void dbg_init(void);
  
@@ -328,5 +328,5 @@ index 9b30aa2595e..98e7c206ab8 100644
                                            ULONG_PTR arg3, PNTAPCFUNC func, NTSTATUS status );
  extern NTSTATUS call_user_exception_dispatcher( EXCEPTION_RECORD *rec, CONTEXT *context );
 -- 
-2.51.2
+2.53.0
 

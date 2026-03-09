@@ -1,4 +1,4 @@
-From 25d6c724e1a7b1456a582285c17dbee612282cfb Mon Sep 17 00:00:00 2001
+From de563ad4e732193318ef516d50255f6cace93277 Mon Sep 17 00:00:00 2001
 From: Marc-Aurel Zent <mzent@codeweavers.com>
 Date: Thu, 30 Oct 2025 21:42:58 +0100
 Subject: [PATCH 39/44] kernelbase: Use NT_ERROR() to check for errors in
@@ -22,5 +22,5 @@ index 6c69a0ab88f..72f3a1796c4 100644
          SetLastError( RtlNtStatusToDosError(status) );
          status = WAIT_FAILED;
 -- 
-2.51.2
+2.53.0
 

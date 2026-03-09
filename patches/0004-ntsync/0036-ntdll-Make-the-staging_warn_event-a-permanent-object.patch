@@ -1,4 +1,4 @@
-From ab515582c697ebaac466b51b1a457e35f8a18a21 Mon Sep 17 00:00:00 2001
+From 24162da67fc6e642fa89ad059493e5178335a4d4 Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Wed, 2 Apr 2025 00:27:23 -0700
 Subject: [PATCH 36/44] ntdll: Make the staging_warn_event a permanent object.
@@ -9,10 +9,10 @@ Avoids printing it repeatedly.
  1 file changed, 4 insertions(+), 5 deletions(-)
 
 diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
-index 117bb176173..30b23155645 100644
+index 6833c881787..8715ae91d60 100644
 --- a/dlls/ntdll/loader.c
 +++ b/dlls/ntdll/loader.c
-@@ -4489,7 +4489,7 @@ void loader_init( CONTEXT *context, void **entry )
+@@ -4535,7 +4535,7 @@ void loader_init( CONTEXT *context, void **entry )
  {
      OBJECT_ATTRIBUTES staging_event_attr;
      UNICODE_STRING staging_event_string;
@@ -21,7 +21,7 @@ index 117bb176173..30b23155645 100644
      static int attach_done;
      NTSTATUS status;
      ULONG_PTR cookie, port = 0;
-@@ -4591,17 +4591,16 @@ void loader_init( CONTEXT *context, void **entry )
+@@ -4637,17 +4637,16 @@ void loader_init( CONTEXT *context, void **entry )
           * add a comment here to try to prevent that. */
      }
      RtlInitUnicodeString( &staging_event_string, L"\\__wine_staging_warn_event" );
@@ -43,5 +43,5 @@ index 117bb176173..30b23155645 100644
      NtCurrentTeb()->FlsSlots = fls_alloc_data();
  
 -- 
-2.51.2
+2.53.0
 

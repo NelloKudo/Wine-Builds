@@ -1,4 +1,4 @@
-From c9d5e0ba7b400574254a3264041a19707f9812e6 Mon Sep 17 00:00:00 2001
+From 728bedb67bdccbb19f2acdc686184b4464e57765 Mon Sep 17 00:00:00 2001
 From: Marc-Aurel Zent <mzent@codeweavers.com>
 Date: Thu, 30 Oct 2025 22:12:40 +0100
 Subject: [PATCH 43/44] ntdll: Reject pseudo-handles in
@@ -134,5 +134,5 @@ index 00000000000..98dce15db68
 +     {
 +         TRACE( "-> %#x\n", ret );
 -- 
-2.51.2
+2.53.0
 

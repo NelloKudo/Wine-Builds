@@ -1,4 +1,4 @@
-From ce05c7951989ecb7e1c201b03b2085716ebbcd9f Mon Sep 17 00:00:00 2001
+From c5361594997761c928a9811719bacf0228603a61 Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Wed, 26 Feb 2025 12:14:30 -0800
 Subject: [PATCH 34/44] ntdll: Check for esync/fsync before doing server waits.
@@ -11,19 +11,19 @@ Subject: [PATCH 34/44] ntdll: Check for esync/fsync before doing server waits.
  4 files changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/dlls/ntdll/unix/file.c b/dlls/ntdll/unix/file.c
-index 565357c3763..77b09e2738c 100644
+index 59162b5051b..ff5786fe248 100644
 --- a/dlls/ntdll/unix/file.c
 +++ b/dlls/ntdll/unix/file.c
-@@ -121,6 +121,8 @@
- #include "wine/list.h"
+@@ -124,6 +124,8 @@
  #include "wine/debug.h"
  #include "unix_private.h"
+ #include "ddk/ntifs.h"
 +#include "fsync.h"
 +#include "esync.h"
  
  WINE_DEFAULT_DEBUG_CHANNEL(file);
  WINE_DECLARE_DEBUG_CHANNEL(winediag);
-@@ -6605,7 +6607,10 @@ NTSTATUS WINAPI NtLockFile( HANDLE file, HANDLE event, PIO_APC_ROUTINE apc, void
+@@ -7577,7 +7579,10 @@ NTSTATUS WINAPI NtLockFile( HANDLE file, HANDLE event, PIO_APC_ROUTINE apc, void
          }
          if (handle)
          {
@@ -36,7 +36,7 @@ index 565357c3763..77b09e2738c 100644
          }
          else  /* Unix lock conflict, sleep a bit and retry */
 diff --git a/dlls/ntdll/unix/process.c b/dlls/ntdll/unix/process.c
-index 2ec119d5db1..2c6a9a61ad4 100644
+index f4c8fe07d59..44768c01db9 100644
 --- a/dlls/ntdll/unix/process.c
 +++ b/dlls/ntdll/unix/process.c
 @@ -70,6 +70,8 @@
@@ -77,7 +77,7 @@ index 28259acfeb0..8cf24104d03 100644
              SERVER_START_REQ( get_apc_result )
              {
 diff --git a/dlls/ntdll/unix/thread.c b/dlls/ntdll/unix/thread.c
-index 75fe87786c2..bcb5b11e0b3 100644
+index b36ab907122..e30b071022c 100644
 --- a/dlls/ntdll/unix/thread.c
 +++ b/dlls/ntdll/unix/thread.c
 @@ -76,6 +76,8 @@
@@ -89,7 +89,7 @@ index 75fe87786c2..bcb5b11e0b3 100644
  
  WINE_DEFAULT_DEBUG_CHANNEL(thread);
  WINE_DECLARE_DEBUG_CHANNEL(seh);
-@@ -1837,7 +1839,10 @@ NTSTATUS get_thread_context( HANDLE handle, void *context, BOOL *self, USHORT ma
+@@ -1862,7 +1864,10 @@ NTSTATUS get_thread_context( HANDLE handle, void *context, BOOL *self, USHORT ma
  
      if (ret == STATUS_PENDING)
      {
@@ -102,5 +102,5 @@ index 75fe87786c2..bcb5b11e0b3 100644
          SERVER_START_REQ( get_thread_context )
          {
 -- 
-2.51.2
+2.53.0
 

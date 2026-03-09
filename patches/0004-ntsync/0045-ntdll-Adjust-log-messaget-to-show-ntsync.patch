@@ -1,0 +1,25 @@
+From 13c2a49d1937bf47ebfd8daf55c35a4ca5248b36 Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Mon, 9 Mar 2026 12:55:23 +0100
+Subject: [PATCH] ntdll: Adjust log messaget to show ntsync.
+
+---
+ dlls/ntdll/loader.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
+index 9a757709980..1a091b00ad1 100644
+--- a/dlls/ntdll/loader.c
++++ b/dlls/ntdll/loader.c
+@@ -4662,7 +4662,7 @@ void loader_init( CONTEXT *context, void **entry )
+                     MESSAGE("fsync: up and running.\n");
+                     break;
+                 case 3:
+-                    MESSAGE("wine: using fast synchronization.\n");
++                    MESSAGE("ntsync: up and running.\n");
+                     break;
+                 default:
+                     MESSAGE("wineserver: using server-side synchronization.\n");
+-- 
+2.53.0
+

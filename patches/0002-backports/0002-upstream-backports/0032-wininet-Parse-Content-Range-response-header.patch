@@ -1,0 +1,140 @@
+From 042dbd3756da29137001218d54e1830293b67637 Mon Sep 17 00:00:00 2001
+From: Torge Matthies <openglfreak@googlemail.com>
+Date: Fri, 6 Mar 2026 02:27:39 +0100
+Subject: [PATCH 32/35] wininet: Parse Content-Range response header.
+
+---
+ dlls/wininet/http.c     | 59 ++++++++++++++++++++++++++++++++++++++++-
+ dlls/wininet/internet.h |  3 +++
+ 2 files changed, 61 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/wininet/http.c b/dlls/wininet/http.c
+index 31b4bee6e15..572cfd63390 100644
+--- a/dlls/wininet/http.c
++++ b/dlls/wininet/http.c
+@@ -601,6 +601,8 @@ static WCHAR* build_request_header(http_request_t *request, const WCHAR *verb,
+     if (with_range && request->content_pos > 0)
+     {
+         ULONGLONG range_end = find_hole_end(request, request->content_pos);
++        request->range_start = request->content_pos;
++        request->range_end = range_end;
+         if (range_end == -1ULL)
+             swprintf(request->range_hdr_value, ARRAY_SIZE(request->range_hdr_value),
+                      L"%I64u-", request->content_pos);
+@@ -2543,7 +2545,8 @@ static void write_cache_file(http_request_t *req, const BYTE *buf, DWORD len)
+     }
+ 
+     if(req->data_stream->vtbl->end_of_data(req->data_stream, req)
+-        && find_range_end(req, 0) >= req->file_pos)
++        && ((req->range_end == -1ULL && find_range_end(req, 0) >= req->file_pos)
++            || find_range_end(req, 0) >= req->contentLength))
+         commit_cache_entry(req);
+ }
+ 
+@@ -3590,6 +3593,7 @@ static DWORD HTTP_HttpOpenRequestW(http_session_t *session,
+     request->hdr.decoding = session->hdr.decoding;
+     list_init(&request->downloaded_ranges);
+     request->contentLength = ~0;
++    request->range_end = -1ULL;
+ 
+     request->netconn_stream.data_stream.vtbl = &netconn_stream_vtbl;
+     request->data_stream = &request->netconn_stream.data_stream;
+@@ -5112,6 +5116,46 @@ static void set_content_length_header( http_request_t *request, DWORD len, DWORD
+     HTTP_HttpAddRequestHeadersW( request, buf, ~0u, flags );
+ }
+ 
++static BOOL parse_content_range(WCHAR *value, ULONGLONG *range_start, ULONGLONG *range_end, ULONGLONG *content_length)
++{
++    static const WCHAR bytesW[] = L"bytes ";
++
++    ULONGLONG start, end, len;
++    WCHAR *ptr;
++
++    if (wcsncmp(value, bytesW, ARRAY_SIZE(bytesW) - 1) || value[6] == '-')
++        return FALSE;
++    ptr = value + 6;
++    if (!wcsncmp(ptr, L"*/", 2))
++    {
++        start = 0;
++        end = -1ULL;
++        ptr++;
++    }
++    else
++    {
++        start = wcstoull(ptr, &ptr, 10);
++        if (*ptr != '-')
++            return FALSE;
++        if (ptr[1] == '/')
++            end = -1ULL;
++        else
++            end = wcstoull(ptr + 1, &ptr, 10);
++    }
++    if (*ptr != '/' || ptr[1] == 0)
++        return FALSE;
++    if (ptr[1] != '*')
++    {
++        len = wcstoull(ptr + 1, &ptr, 10);
++        if (*ptr != 0)
++            return FALSE;
++        *content_length = len;
++    }
++    *range_start = start;
++    *range_end = end == -1ULL ? -1ULL : end + 1;
++    return TRUE;
++}
++
+ static DWORD create_request(http_request_t *request, void *optional, DWORD optlen, DWORD content_length,
+                             BOOL restarting, BOOL end_request)
+ {
+@@ -5383,6 +5427,14 @@ static DWORD create_request(http_request_t *request, void *optional, DWORD optle
+     }
+     while (loop_next);
+ 
++    if (res == ERROR_SUCCESS)
++    {
++        request->range_start = 0;
++        request->range_end = -1ULL;
++        parse_content_range(request->content_range,&request->range_start,&request->range_end,&request->contentLength);
++        request->file_pos = request->range_start;
++    }
++
+ lend:
+     return res;
+ }
+@@ -6151,6 +6203,8 @@ static DWORD HTTP_GetResponseHeaders(http_request_t *request, INT *len, BOOL res
+ 
+     TRACE("-->\n");
+ 
++    request->content_range[0] = 0;
++
+     if(!is_valid_netconn(request->netconn))
+         goto lend;
+ 
+@@ -6239,6 +6293,9 @@ static DWORD HTTP_GetResponseHeaders(http_request_t *request, INT *len, BOOL res
+             pFieldAndValue = HTTP_InterpretHttpHeader(buffer);
+             if (pFieldAndValue)
+             {
++                if (!lstrcmpiW(pFieldAndValue[0], L"Content-Range"))
++                    lstrcpynW(request->content_range, pFieldAndValue[1],
++                              ARRAY_SIZE(request->content_range));
+                 if (!restarting)
+                     HTTP_ProcessHeader(request, pFieldAndValue[0], pFieldAndValue[1],
+                                        HTTP_ADDREQ_FLAG_ADD );
+diff --git a/dlls/wininet/internet.h b/dlls/wininet/internet.h
+index 3dc0ec934a9..e397fc96da8 100644
+--- a/dlls/wininet/internet.h
++++ b/dlls/wininet/internet.h
+@@ -342,7 +342,10 @@ typedef struct
+     ULONGLONG file_pos;
+     struct list downloaded_ranges;
+     req_file_t *req_file;
++    ULONGLONG range_start;
++    ULONGLONG range_end;
+     WCHAR range_hdr_value[42];
++    WCHAR content_range[70];
+     FILETIME expires;
+     struct HttpAuthInfo *authInfo;
+     struct HttpAuthInfo *proxyAuthInfo;
+-- 
+2.53.0
+

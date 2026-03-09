@@ -1,4 +1,4 @@
-From 182dfb6ec1a693243908990382ad78a4f6d1676a Mon Sep 17 00:00:00 2001
+From 38441352c353859645222796c159c0d9036a0ac8 Mon Sep 17 00:00:00 2001
 From: Marc-Aurel Zent <mzent@codeweavers.com>
 Date: Mon, 27 Oct 2025 19:19:24 +0100
 Subject: [PATCH 40/44] kernelbase: Reimplement WaitForSingleObject[Ex] on top
@@ -42,5 +42,5 @@ index 72f3a1796c4..de4e7b65e0b 100644
  
  
 -- 
-2.51.2
+2.53.0
 
