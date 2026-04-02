@@ -21,7 +21,7 @@ _configuration() {
     STAGING_ARGS="${STAGING_ARGS:-"--all"}"
 
     # Toggle to enable/disable Wine-tkg.
-    USE_TKG="${USE_TKG:-false}"
+    USE_TKG="${USE_TKG:-true}"
 
     # Toggle to enable/disable Wine-CachyOS.
     USE_CACHY="${USE_CACHY:-false}"
@@ -36,12 +36,12 @@ _configuration() {
     WINE_VERSION=''
     STAGING_VERSION=''
     WINE_BRANCH="${WINE_BRANCH:-}"
-    RELEASE_VERSION='9'
+    RELEASE_VERSION='1'
     PATCHSET=''
 
     # Build configuration
     # You can change the default value by changing the value after :-
-    USE_WOW64="${1:-true}"
+    USE_WOW64="${1:-false}"
     BUILD_FONTS="${2:-false}"
     DEBUG="${3:-false}"
     USE_LLVM_MINGW="${4:-false}"
@@ -506,7 +506,7 @@ main() {
         Info "Using latest Wine version"
         (git checkout master && git pull origin master) || Info "Master not found for this repository, using default commit.."
     fi
-    WINE_VERSION=$(git describe --tags --abbrev=0 | cut -f2 -d'-')
+    WINE_VERSION="7.16"
     Info "Building Wine version: ${WINE_VERSION}"
 
     # Custom settings for branches

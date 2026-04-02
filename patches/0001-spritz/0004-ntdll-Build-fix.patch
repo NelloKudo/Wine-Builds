@@ -1,0 +1,24 @@
+From e6fee288454889c1309cd79ddbc3ce09aa9ecb8a Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Fri, 3 Apr 2026 01:44:25 +0200
+Subject: [PATCH 4/4] ntdll: Build fix.
+
+---
+ dlls/ntdll/printf.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dlls/ntdll/printf.c b/dlls/ntdll/printf.c
+index 37419ea1e..043ee2bb2 100644
+--- a/dlls/ntdll/printf.c
++++ b/dlls/ntdll/printf.c
+@@ -24,6 +24,7 @@
+ #include <limits.h>
+ #include <stdarg.h>
+ #include <stdlib.h>
++#define _NO_CRT_STDIO_INLINE
+ #include <stdio.h>
+ #include <string.h>
+ 
+-- 
+2.53.0
+

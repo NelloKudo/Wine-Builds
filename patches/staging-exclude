@@ -1,1 +1,0 @@
--W oleaut32_VarAdd -W winedevice-Default_Drivers -W dsound-EAX -W mountmgr-DosDevices -W ntdll-NtDevicePath

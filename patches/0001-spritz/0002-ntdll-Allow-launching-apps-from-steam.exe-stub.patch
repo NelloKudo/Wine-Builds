@@ -1,0 +1,118 @@
+From 39904620feb1d3596e07424d157de44979ddf8e8 Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Fri, 3 Apr 2026 01:08:16 +0200
+Subject: [PATCH 2/4] ntdll: Allow launching apps from steam.exe stub.
+
+Some games need to be launched from Proton's stub steam.exe to allow
+being launched on Linux and related systems: this allows doing so without
+any Proton script, but straight up from Wine.
+---
+ dlls/ntdll/unix/env.c          | 32 ++++++++++++++++++++++++++++++--
+ dlls/ntdll/unix/loader.c       | 28 ++++++++++++++++++++++++++++
+ dlls/ntdll/unix/unix_private.h |  1 +
+ 3 files changed, 59 insertions(+), 2 deletions(-)
+
+diff --git a/dlls/ntdll/unix/env.c b/dlls/ntdll/unix/env.c
+index b43c223d0..55dd91577 100644
+--- a/dlls/ntdll/unix/env.c
++++ b/dlls/ntdll/unix/env.c
+@@ -1890,6 +1890,24 @@ static void init_peb( RTL_USER_PROCESS_PARAMETERS *params, void *module )
+ }
+ 
+ 
++/* HACK: Check for conditions to use the Steam stub */
++static BOOL use_steam_stub()
++{
++    static volatile char cache = -1;
++    if (cache == -1)
++    {
++        const char *env = getenv("WINE_ENABLE_STEAM_STUB");
++
++        if (env && atoi(env))
++            cache = TRUE;
++        else
++            cache = FALSE;
++    }
++
++    return cache;
++}
++
++
+ /*************************************************************************
+  *		build_initial_params
+  *
+@@ -1926,8 +1944,18 @@ static RTL_USER_PROCESS_PARAMETERS *build_initial_params( void **module )
+     add_registry_environment( &env, &env_pos, &env_size );
+     env[env_pos++] = 0;
+ 
+-    load_start_exe( &image, module );
+-    prepend_argv( args, 2 );
++    /* check if we should launch from the Steam stub */
++    if (use_steam_stub())
++    {
++        static const char *steam_args[] = { "steam.exe" };
++        load_steam_exe( &image, module );
++        prepend_argv( steam_args, 1 );
++    }
++    else
++    {
++        load_start_exe( &image, module );
++        prepend_argv( args, 2 );
++    }
+ 
+     main_wargv = build_wargv( get_dos_path( image ));
+     cmdline = build_command_line( main_wargv );
+diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
+index c39f63d9e..f8f388dd7 100644
+--- a/dlls/ntdll/unix/loader.c
++++ b/dlls/ntdll/unix/loader.c
+@@ -1883,6 +1883,34 @@ NTSTATUS load_start_exe( WCHAR **image, void **module )
+ }
+ 
+ 
++/***********************************************************************
++ *           load_steam_exe
++ *
++ * Load steam.exe as main image.
++ * Adapted from load_start_exe.
++ */
++NTSTATUS load_steam_exe( WCHAR **image, void **module )
++{
++    static const WCHAR startW[] = {'s','t','e','a','m','.','e','x','e',0};
++    UNICODE_STRING nt_name;
++    NTSTATUS status;
++    SIZE_T size;
++
++    *image = malloc( sizeof("\\??\\C:\\windows\\system32\\steam.exe") * sizeof(WCHAR) );
++    wcscpy( *image, get_machine_wow64_dir( current_machine ));
++    wcscat( *image, startW );
++    init_unicode_string( &nt_name, *image );
++    status = find_builtin_dll( &nt_name, module, &size, &main_image_info, 0, current_machine, FALSE );
++    if (status)
++    {
++        MESSAGE( "wine: failed to load steam.exe: %x\n", status );
++        NtTerminateProcess( GetCurrentProcess(), status );
++    }
++    MESSAGE("wine: launching from steam.exe stub!\n");
++    return status;
++}
++
++
+ #ifdef __FreeBSD__
+ /* The PT_LOAD segments are sorted in increasing order, and the first
+  * starts at the beginning of the ELF file. By parsing the file, we can
+diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
+index 258880ff7..0e057ef83 100644
+--- a/dlls/ntdll/unix/unix_private.h
++++ b/dlls/ntdll/unix/unix_private.h
+@@ -162,6 +162,7 @@ extern BOOL is_builtin_path( const UNICODE_STRING *path, WORD *machine ) DECLSPE
+ extern NTSTATUS load_main_exe( const WCHAR *name, const char *unix_name, const WCHAR *curdir, WCHAR **image,
+                                void **module ) DECLSPEC_HIDDEN;
+ extern NTSTATUS load_start_exe( WCHAR **image, void **module ) DECLSPEC_HIDDEN;
++extern NTSTATUS load_steam_exe( WCHAR **image, void **module ) DECLSPEC_HIDDEN;
+ extern void start_server( BOOL debug ) DECLSPEC_HIDDEN;
+ 
+ extern unsigned int server_call_unlocked( void *req_ptr ) DECLSPEC_HIDDEN;
+-- 
+2.53.0
+

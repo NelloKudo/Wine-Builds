@@ -1,0 +1,30 @@
+From 82cea79e9ab343157f9a0a69962ef0e72057ac1d Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Fri, 3 Apr 2026 01:09:44 +0200
+Subject: [PATCH 3/4] ntdll: Set WINE_ENABLE_STEAM_STUB for some games.
+
+Fixes crashes at startup for games which check if they've been
+launched from 'steam.exe' in their code.
+Based on Proton's hacks_init() function.
+---
+ dlls/ntdll/unix/loader.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
+index f8f388dd7..4c10a9cba 100644
+--- a/dlls/ntdll/unix/loader.c
++++ b/dlls/ntdll/unix/loader.c
+@@ -2185,6 +2185,10 @@ static void hacks_init(void)
+     static const char ac_odyssey_exe[] = "ACOdyssey.exe";
+     const char *env_str;
+ 
++    if (main_argc > 1 && (strstr(main_argv[1], "GenshinImpact.exe") || strstr(main_argv[1], "YuanShen.exe")
++        || strstr(main_argv[1], "fpsunlock.exe") || strstr(main_argv[1], "ZenlessZoneZero.exe") ))
++        setenv( "WINE_ENABLE_STEAM_STUB", "1", 0 );
++
+     if (main_argc > 1 && strstr(main_argv[1], ac_odyssey_exe))
+     {
+         ERR("HACK: AC Odyssey sync tweak on.\n");
+-- 
+2.53.0
+
