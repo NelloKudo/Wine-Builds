@@ -1,7 +1,7 @@
-From 997ab0cb5b3a05072927cea74d25c5b01afc9bee Mon Sep 17 00:00:00 2001
+From 7885d27594718a09f3a049672cf3d51d023b666e Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Tue, 7 Oct 2025 12:54:50 +0200
-Subject: [PATCH 01/15] loader: change winediag logging to Spritz
+Subject: [PATCH 01/12] loader: change winediag logging to Spritz
 
 ---
  dlls/ntdll/loader.c | 4 ++--

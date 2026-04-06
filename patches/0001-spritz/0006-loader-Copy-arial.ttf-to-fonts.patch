@@ -1,14 +1,14 @@
-From a4a196682f85a076e38f7c827fa9ef6a1f4ac764 Mon Sep 17 00:00:00 2001
+From 735d419361590e86538a04e8fe431618d6fa70f0 Mon Sep 17 00:00:00 2001
 From: mkrsym1 <mkrsym1@gmail.com>
 Date: Mon, 8 Sep 2025 21:05:27 +0200
-Subject: [PATCH 07/15] loader: Copy arial.ttf to fonts
+Subject: [PATCH 06/12] loader: Copy arial.ttf to fonts
 
 ---
  loader/wine.inf.in | 17 +++++++++++------
  1 file changed, 11 insertions(+), 6 deletions(-)
 
 diff --git a/loader/wine.inf.in b/loader/wine.inf.in
-index 4d0c9795e6e..514bb88dbea 100644
+index b039c3294c9..951a6a74eb7 100644
 --- a/loader/wine.inf.in
 +++ b/loader/wine.inf.in
 @@ -54,7 +54,7 @@ AddService=MountMgr,0x800,MountMgrService

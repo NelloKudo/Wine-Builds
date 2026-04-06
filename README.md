@@ -26,7 +26,7 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
   - `WINE_DISABLE_DISCONNECT=1`: disables the disconnecting trick when enabled by default
   - `WINE_ENABLE_DISCONNECT=1`: enables the disconnecting trick
   - `WINE_ENABLE_STEAM_STUB=1`: launches the executable using the `steam.exe` stub in the builds
-  - `WINE_ENABLE_USE_TAKE_FOCUS=1`: re-enables UseTakeFocus, to use if having issues with tabbing
+  - `WINE_USE_TAKE_FOCUS=0`: resets UseTakeFocus to default value, to use if having issues with tabbing.
 
 - Proton controllers:
   - `PROTON_DISABLE_HIDRAW=1`: disables hidraw, might fix issues with controllers on Xbox

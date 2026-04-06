@@ -1,7 +1,7 @@
-From 578776a50afb3cbed9c64920426ce3a96c3dbac8 Mon Sep 17 00:00:00 2001
+From 03f61210c15d334573ab95031fde92eaa720efde Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Tue, 7 Oct 2025 13:06:25 +0200
-Subject: [PATCH 05/15] ntdll: Set WINE_ENABLE_STEAM_STUB by default for some
+Subject: [PATCH 05/12] ntdll: Set WINE_ENABLE_STEAM_STUB by default for some
  games
 
 Fixes crashes at startup for games which check if they've been
