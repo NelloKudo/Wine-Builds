@@ -21,7 +21,6 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
 - Sync methods:
   - `WINENTSYNC=0`: disables NTsync, fallbacks to fsync
   - `WINEFSYNC=0`: disables fsync, fallbacks to esync
-  - `WINEESYNC=0`: disables esync, fallbacks to server sync
 
 - Spritz patches:
   - `WINE_DISABLE_DISCONNECT=1`: disables the disconnecting trick when enabled by default
@@ -35,6 +34,6 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
 
 ## Builds description
 
-Spritz builds are built in a Docker container based on Proton's SDK, with a few changes you can see in the Dockerfile. The `wine-builder` container is hosted [here](https://hub.docker.com/r/nellokudo/wine-builder), built from its apposite [GitHub CI](https://github.com/NelloKudo/WineBuilder/actions/workflows/dockerhub.yml) from my main repository of [WineBuilder](https://github.com/NelloKudo/WineBuilder).
+Spritz builds are built in a Docker container based on Proton's SDK, with a few changes you can see in the Dockerfile. The `wine-builder` container is hosted [here](https://hub.docker.com/r/nellokudo/wine-builder), built from its apposite [GitHub repository](https://github.com/NelloKudo/winebuilder-image).
 
 Many thanks to spectator's work in the main repository for the polished building process.
