@@ -1,0 +1,53 @@
+From 00a4623e3733d823606068a3fc97db7f9c4375ca Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
+Date: Wed, 14 Dec 2022 21:21:50 +0100
+Subject: [PATCH 2/2] HACK: winex11.drv: Workaround focusing out of exclusive
+ fullscreen windows.
+
+This retargets some old window manager workarounds which don't seem to
+be required anymore for the original issues but is still necessary to
+be able to focus out of exclusive fullscreen windows.
+
+Original commits were:
+
+  commit e35f70c300b8f59e1d45e7c9d7b3b93d55741955
+  Author: Andrew Eikum <aeikum@codeweavers.com>
+  Date:   Tue Sep 18 08:11:59 2018 -0500
+
+    winex11: Don't set ABOVE on minimized fullscreened windows
+
+    This is a workaround for mutter bug #306.
+
+  commit 41022f9151475da15ec64a2ac64fd4830253e3f5
+  Author: Andrew Eikum <aeikum@codeweavers.com>
+  Date:   Mon Jun 1 09:18:35 2020 -0500
+
+    winex11.drv: Don't set ABOVE for fullscreen windows on KDE
+---
+ dlls/winex11.drv/window.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
+index 678ad1fa38e..325fda9e712 100644
+--- a/dlls/winex11.drv/window.c
++++ b/dlls/winex11.drv/window.c
+@@ -1500,7 +1500,15 @@ static void update_net_wm_states( struct x11drv_win_data *data )
+         new_state |= (1 << NET_WM_STATE_MAXIMIZED);
+ 
+     ex_style = NtUserGetWindowLongW( data->hwnd, GWL_EXSTYLE );
+-    if (ex_style & WS_EX_TOPMOST)
++    if ((ex_style & WS_EX_TOPMOST) &&
++        /* This workaround was initially targetting some mutter and KDE issues, but
++         * removing it causes failure to focus out from exclusive fullscreen windows.
++         *
++         * Many games do not have any specific logic to get out of exclusive fullscreen
++         * mode, and we have currently no way to tell exclusive fullscreen from a window
++         * with topmost + fullscreen styles, so we cannot properly implement it either.
++         */
++        !(new_state & (1 << NET_WM_STATE_FULLSCREEN)))
+         new_state |= (1 << NET_WM_STATE_ABOVE);
+     if (!data->add_taskbar)
+     {
+-- 
+2.53.0
+

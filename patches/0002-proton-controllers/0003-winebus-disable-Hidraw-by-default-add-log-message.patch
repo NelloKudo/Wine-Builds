@@ -1,0 +1,39 @@
+From 2ddf76e80fcda434a2660e80e2ebd96db0e4f4b3 Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Mon, 15 Sep 2025 17:07:35 +0200
+Subject: [PATCH 3/7] winebus: disable Hidraw by default, add log message
+
+Disabling Hidraw is needed for most controllers to work without issues: using it though, breaks
+PlayStation glyphs for games with native dualsense support. Hence, notify the user about it
+in logs, as PROTON_ENABLE_HIDRAW=1 fixes it.
+---
+ dlls/winebus.sys/main.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/winebus.sys/main.c b/dlls/winebus.sys/main.c
+index f449271a549..b61fc140a10 100644
+--- a/dlls/winebus.sys/main.c
++++ b/dlls/winebus.sys/main.c
+@@ -531,6 +531,10 @@ static DWORD check_bus_option(const WCHAR *option, DWORD default_value)
+         if (info->Type == REG_DWORD) return *(DWORD *)info->Data;
+     }
+ 
++    /* Hidraw is disabled by default: add logging message about it*/
++    if (!wcsicmp(option, L"DisableHidraw"))
++        FIXME("Hidraw is disabled by default; to enable it (ex. fix PlayStation glyphs not showing), add PROTON_ENABLE_HIDRAW=1\n");
++
+     return default_value;
+ }
+ 
+@@ -1223,7 +1227,7 @@ static void bus_options_init(void)
+ {
+     options.disable_sdl = !check_bus_option(L"Enable SDL", 1);
+     if (options.disable_sdl) TRACE("SDL devices disabled in registry\n");
+-    options.disable_hidraw = check_bus_option(L"DisableHidraw", 0);
++    options.disable_hidraw = check_bus_option(L"DisableHidraw", 1);
+     if (options.disable_hidraw) TRACE("UDEV hidraw devices disabled in registry\n");
+     options.disable_input = check_bus_option(L"DisableInput", 0);
+     if (options.disable_input) TRACE("UDEV input devices disabled in registry\n");
+-- 
+2.53.0
+

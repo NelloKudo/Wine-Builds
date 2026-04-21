@@ -1,0 +1,64 @@
+From c9a9f0ca9fb929ba421ad166e6ea40abc364a01e Mon Sep 17 00:00:00 2001
+From: Paul Gofman <pgofman@codeweavers.com>
+Date: Tue, 15 Feb 2022 17:20:40 +0300
+Subject: [PATCH 1/6] fsync: Add WINE_FSYNC_SIMULATE_SCHED_QUANTUM config
+ option.
+
+And auto enable it for Uplay laucher.
+
+CW-Bug-Id: #20155
+---
+ dlls/ntdll/unix/env.c          | 10 ++++++++++
+ dlls/ntdll/unix/unix_private.h |  1 +
+ 2 files changed, 11 insertions(+)
+
+diff --git a/dlls/ntdll/unix/env.c b/dlls/ntdll/unix/env.c
+index 88689e95037..faf269177e1 100644
+--- a/dlls/ntdll/unix/env.c
++++ b/dlls/ntdll/unix/env.c
+@@ -74,6 +74,7 @@ static const WCHAR bootstrapW[] = {'W','I','N','E','B','O','O','T','S','T','R','
+ int main_argc = 0;
+ char **main_argv = NULL;
+ WCHAR **main_wargv = NULL;
++BOOL fsync_simulate_sched_quantum = FALSE;
+ 
+ static LCID user_lcid, system_lcid;
+ static LANGID user_ui_language;
+@@ -823,6 +824,7 @@ static void init_locale(void)
+ void init_environment(void)
+ {
+     USHORT *case_table;
++    const char *env_str;
+ 
+     init_unix_codepage();
+     init_locale();
+@@ -832,6 +834,14 @@ void init_environment(void)
+         uctable = case_table + 2;
+         lctable = case_table + case_table[1] + 2;
+     }
++
++    env_str = getenv( "WINE_FSYNC_SIMULATE_SCHED_QUANTUM" );
++    if (env_str)
++        fsync_simulate_sched_quantum = !!atoi( env_str );
++    else if (main_argc > 1)
++        fsync_simulate_sched_quantum = !!strstr( main_argv[1], "Ubisoft Game Launcher\\upc.exe" );
++    if (fsync_simulate_sched_quantum)
++        ERR( "HACK: Simulating sched quantum in fsync.\n" );
+ }
+ 
+ 
+diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
+index eea0670f0f0..75f3f3e519f 100644
+--- a/dlls/ntdll/unix/unix_private.h
++++ b/dlls/ntdll/unix/unix_private.h
+@@ -205,6 +205,7 @@ extern BOOL is_prefix_bootstrap;
+ extern int main_argc;
+ extern char **main_argv;
+ extern WCHAR **main_wargv;
++extern BOOL fsync_simulate_sched_quantum;
+ extern const WCHAR system_dir[];
+ extern unsigned int supported_machines_count;
+ extern USHORT supported_machines[8];
+-- 
+2.53.0
+

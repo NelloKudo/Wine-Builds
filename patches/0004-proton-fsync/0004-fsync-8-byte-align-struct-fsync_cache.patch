@@ -1,0 +1,25 @@
+From a029bc5d71d9683b766159f3cb108a4ddadb14fc Mon Sep 17 00:00:00 2001
+From: Paul Gofman <pgofman@codeweavers.com>
+Date: Sun, 12 Apr 2026 13:42:46 -0600
+Subject: [PATCH 4/6] fsync: 8-byte align 'struct fsync_cache'.
+
+---
+ dlls/ntdll/unix/fsync.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dlls/ntdll/unix/fsync.c b/dlls/ntdll/unix/fsync.c
+index 962ee595887..d89fcda722c 100644
+--- a/dlls/ntdll/unix/fsync.c
++++ b/dlls/ntdll/unix/fsync.c
+@@ -224,7 +224,7 @@ static void *get_shm( unsigned int idx )
+ #define FSYNC_LIST_BLOCK_SIZE  (65536 / sizeof(struct fsync))
+ #define FSYNC_LIST_ENTRIES     256
+ 
+-struct fsync_cache
++struct DECLSPEC_ALIGN(8) fsync_cache
+ {
+     enum fsync_type type;
+     unsigned int shm_idx;
+-- 
+2.53.0
+

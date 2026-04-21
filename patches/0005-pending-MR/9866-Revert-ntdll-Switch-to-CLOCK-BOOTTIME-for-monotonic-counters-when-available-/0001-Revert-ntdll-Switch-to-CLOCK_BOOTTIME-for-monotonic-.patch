@@ -1,0 +1,45 @@
+From 57c3b8247782bf469646a9c3a3840797c0caad46 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
+Date: Thu, 8 Jan 2026 11:03:44 +0100
+Subject: [PATCH] Revert "ntdll: Switch to CLOCK_BOOTTIME for monotonic
+ counters when available."
+
+This reverts commit 3d373e452388b60bea9dca6d5c4cf3f8b20a0c54.
+---
+ dlls/ntdll/unix/sync.c | 4 ++--
+ server/request.c       | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/dlls/ntdll/unix/sync.c b/dlls/ntdll/unix/sync.c
+index 070673c3d29..eddffe5d21d 100644
+--- a/dlls/ntdll/unix/sync.c
++++ b/dlls/ntdll/unix/sync.c
+@@ -98,8 +98,8 @@ static inline ULONGLONG monotonic_counter(void)
+     return mach_continuous_time() * timebase.numer / timebase.denom / 100;
+ #elif defined(HAVE_CLOCK_GETTIME)
+     struct timespec ts;
+-#ifdef CLOCK_BOOTTIME
+-    if (!clock_gettime( CLOCK_BOOTTIME, &ts ))
++#ifdef CLOCK_MONOTONIC_RAW
++    if (!clock_gettime( CLOCK_MONOTONIC_RAW, &ts ))
+         return ts.tv_sec * (ULONGLONG)TICKSPERSEC + ts.tv_nsec / 100;
+ #endif
+     if (!clock_gettime( CLOCK_MONOTONIC, &ts ))
+diff --git a/server/request.c b/server/request.c
+index 994169a0565..ed39637728e 100644
+--- a/server/request.c
++++ b/server/request.c
+@@ -514,8 +514,8 @@ timeout_t monotonic_counter(void)
+     return mach_continuous_time() * timebase.numer / timebase.denom / 100;
+ #elif defined(HAVE_CLOCK_GETTIME)
+     struct timespec ts;
+-#ifdef CLOCK_BOOTTIME
+-    if (!clock_gettime( CLOCK_BOOTTIME, &ts ))
++#ifdef CLOCK_MONOTONIC_RAW
++    if (!clock_gettime( CLOCK_MONOTONIC_RAW, &ts ))
+         return (timeout_t)ts.tv_sec * TICKS_PER_SEC + ts.tv_nsec / 100;
+ #endif
+     if (!clock_gettime( CLOCK_MONOTONIC, &ts ))
+-- 
+2.53.0
+

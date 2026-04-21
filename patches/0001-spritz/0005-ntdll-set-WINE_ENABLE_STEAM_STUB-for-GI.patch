@@ -1,0 +1,44 @@
+From 9415959ca951fc6ff2c0dc6ceafb24fc5000767c Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Thu, 18 Sep 2025 11:50:52 +0200
+Subject: [PATCH 5/9] ntdll: set WINE_ENABLE_STEAM_STUB for GI
+
+Based on Proton's hacks_init() function.
+---
+ dlls/ntdll/unix/loader.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/dlls/ntdll/unix/loader.c b/dlls/ntdll/unix/loader.c
+index 2cd81de09c3..67124d3486c 100644
+--- a/dlls/ntdll/unix/loader.c
++++ b/dlls/ntdll/unix/loader.c
+@@ -1878,6 +1878,18 @@ static ULONG_PTR get_image_address(void)
+     return 0;
+ }
+ 
++static void hacks_init(void)
++{
++    if (main_argc > 1 && 
++        (strstr(main_argv[1], "GenshinImpact.exe") || 
++         strstr(main_argv[1], "YuanShen.exe") || 
++         strstr(main_argv[1], "fpsunlock.exe") || 
++         strstr(main_argv[1], "ZenlessZoneZero.exe")))
++    {
++        setenv("WINE_ENABLE_STEAM_STUB", "1", 0);
++    }
++}
++
+ /***********************************************************************
+  *           start_main_thread
+  */
+@@ -1888,6 +1900,7 @@ static void start_main_thread(void)
+     signal_init_threading();
+     dbg_init();
+     startup_info_size = server_init_process();
++    hacks_init();
+     virtual_map_user_shared_data();
+     init_cpu_info();
+     init_files();
+-- 
+2.53.0
+

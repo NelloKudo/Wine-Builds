@@ -1,0 +1,83 @@
+From 4254f57fcc51bbfd479bc2617839efd99298348d Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Fri, 17 Apr 2026 05:13:30 +0200
+Subject: [PATCH 6/6] fsync: Enable by default as fallback when ntsync is
+ unavailable.
+
+---
+ dlls/ntdll/unix/fsync.c | 5 ++---
+ server/fsync.c          | 4 +++-
+ server/inproc_sync.c    | 2 +-
+ server/main.c           | 3 ---
+ 4 files changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/dlls/ntdll/unix/fsync.c b/dlls/ntdll/unix/fsync.c
+index d89fcda722c..4079b3eacc4 100644
+--- a/dlls/ntdll/unix/fsync.c
++++ b/dlls/ntdll/unix/fsync.c
+@@ -459,7 +459,7 @@ void fsync_init( DWORD pid )
+     syscall( __NR_futex_waitv, NULL, 0, 0, NULL, 0 );
+     if (errno == ENOSYS || errno == EPERM)
+     {
+-        ERR("Server is running with WINEFSYNC but this process can't use __NR_futex_waitv.\n");
++        ERR("This process can't use __NR_futex_waitv (fsync not supported).\n");
+         exit(1);
+     }
+ 
+@@ -473,9 +473,8 @@ void fsync_init( DWORD pid )
+ 
+     if ((shm_fd = shm_open( shm_name, O_RDWR, 0644 )) == -1)
+     {
+-        /* probably the server isn't running with WINEFSYNC, tell the user and bail */
+         if (errno == ENOENT)
+-            ERR("Failed to open fsync shared memory file; make sure no stale wineserver instances are running without WINEFSYNC.\n");
++            ERR("Failed to open fsync shared memory file; make sure no stale wineserver instances are running.\n");
+         else
+             ERR("Failed to initialize shared memory: %s\n", strerror( errno ));
+         exit(1);
+diff --git a/server/fsync.c b/server/fsync.c
+index 7d3ec646f9e..2e4f2430c62 100644
+--- a/server/fsync.c
++++ b/server/fsync.c
+@@ -57,8 +57,10 @@ int do_fsync_cached = -1;
+ int fsync_check_support(void)
+ {
+ #ifdef __linux__
++    const char *e = getenv( "WINEFSYNC" );
++    if (e && !atoi( e )) return 0;
+     syscall( __NR_futex_waitv, 0, 0, 0, 0, 0 );
+-    return getenv( "WINEFSYNC" ) && atoi(getenv( "WINEFSYNC" )) && errno != ENOSYS && errno != EPERM;
++    return errno != ENOSYS && errno != EPERM;
+ #else
+     return 0;
+ #endif
+diff --git a/server/inproc_sync.c b/server/inproc_sync.c
+index 2ca4cb39bd3..12c8769d72a 100644
+--- a/server/inproc_sync.c
++++ b/server/inproc_sync.c
+@@ -61,7 +61,7 @@ int get_inproc_device_fd(void)
+             do_fsync_cached = 0;
+             fprintf( stderr, "ntsync: up and running.\n" );
+         }
+-        else if (do_fsync()) fd = FSYNC_USED_BY_SERVER;
++        else if (do_fsync()) { fsync_init(); fd = FSYNC_USED_BY_SERVER; }
+         else fprintf( stderr, "wineserver: using server-side synchronization.\n" );
+     }
+     return fd;
+diff --git a/server/main.c b/server/main.c
+index 7f3930ed31f..5ef9fd00dd8 100644
+--- a/server/main.c
++++ b/server/main.c
+@@ -261,9 +261,6 @@ int main( int argc, char *argv[] )
+     sock_init();
+     open_master_socket();
+ 
+-    if (do_fsync())
+-        fsync_init();
+-
+     if (debug_level) fprintf( stderr, "wineserver: starting (pid=%ld)\n", (long) getpid() );
+     set_current_time();
+     init_signals();
+-- 
+2.53.0
+

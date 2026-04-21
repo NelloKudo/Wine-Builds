@@ -1,0 +1,33 @@
+From 7f4b414ccc676c6896f24a33e7542b2d2b75e4cf Mon Sep 17 00:00:00 2001
+From: NelloKudo <marshnelloosu@gmail.com>
+Date: Wed, 10 Sep 2025 01:12:08 +0200
+Subject: [PATCH 1/9] winediag: change logging and redirect to Spritz
+ repository
+
+---
+ dlls/ntdll/loader.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
+index 7b8f831b3e1..a4f6bffbd5b 100644
+--- a/dlls/ntdll/loader.c
++++ b/dlls/ntdll/loader.c
+@@ -4630,12 +4630,12 @@ void loader_init( CONTEXT *context, void **entry )
+     InitializeObjectAttributes( &staging_event_attr, &staging_event_string, OBJ_OPENIF, NULL, NULL );
+     if (NtCreateEvent( &staging_event, EVENT_ALL_ACCESS, &staging_event_attr, NotificationEvent, FALSE ) == STATUS_SUCCESS)
+     {
+-        FIXME_(winediag)("wine-staging %s is a testing version containing experimental patches.\n", wine_get_version());
+-        FIXME_(winediag)("Please mention your exact version when filing bug reports on winehq.org.\n");
++        FIXME_(winediag)("Spritz-Wine-TkG (staging) %s is a downstream version containing specific patches for games.\n", wine_get_version());
++        FIXME_(winediag)("Please don't report bugs about it on winehq.org or at wine-tkg but use https://github.com/NelloKudo/Wine-Builds instead.\n");
+     }
+     else
+     {
+-        WARN_(winediag)("wine-staging %s is a testing version containing experimental patches.\n", wine_get_version());
++        WARN_(winediag)("Spritz-Wine-TkG (staging) %s is a downstream version containing specific patches for games.\n", wine_get_version());
+         NtClose( staging_event );
+     }
+ 
+-- 
+2.53.0
+

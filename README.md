@@ -11,21 +11,22 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
 
 - Fixes various issues with **certain anime games**, from launch issues to hanging on exit
 - Rebased to **latest wine-staging**
-- Bundles all **esync/fsync/ntsync** in the same build, with latter used by default if possible
+- Bundles both **fsync/NTsync** in the same build, with NTsync used by default if available
 - Includes many of Wine-TkG's fixes
 - Backported and reworked many patches from Proton, mostly aiming controllers
-- Includes some QoL fixes for dropping inputs, random crashes and alt-tabbing.
+- Includes some QoL fixes for dropping inputs, random crashes and alt-tabbing
 
 ## Useful environmental variables
 
 - Sync methods:
   - `WINENTSYNC=0`: disables NTsync, fallbacks to fsync
-  - `WINEFSYNC=0`: disables fsync, fallbacks to esync
+  - `WINEFSYNC=0`: disables fsync, fallbacks to server sync
 
 - Spritz patches:
   - `WINE_DISABLE_DISCONNECT=1`: disables the disconnecting trick when enabled by default
   - `WINE_ENABLE_DISCONNECT=1`: enables the disconnecting trick
   - `WINE_ENABLE_STEAM_STUB=1`: launches the executable using the `steam.exe` stub in the builds
+  - `WINE_ENABLE_TIMEOUT_FIX=1`: enables experimental timeout fix when needed
 
 - Proton imported patches:
   - `PROTON_PREFER_SDL=1`: uses SDL instead of hidraw, disabling it (already default)

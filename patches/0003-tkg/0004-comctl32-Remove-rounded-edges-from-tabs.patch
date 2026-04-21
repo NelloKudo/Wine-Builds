@@ -1,0 +1,127 @@
+From 8a8edc5fcd11322edadc2bc0cff76a5f2d6065ea Mon Sep 17 00:00:00 2001
+From: Joshua Ashton <joshua@froggi.es>
+Date: Thu, 16 Jul 2020 10:18:14 +0100
+Subject: [PATCH 4/8] comctl32: Remove rounded edges from tabs
+
+Signed-off-by: Joshua Ashton <joshua@froggi.es>
+---
+ dlls/comctl32/tab.c | 49 +++++++++++++++------------------------------
+ 1 file changed, 16 insertions(+), 33 deletions(-)
+
+diff --git a/dlls/comctl32/tab.c b/dlls/comctl32/tab.c
+index 352c4bf861d..f1612bf8d4c 100644
+--- a/dlls/comctl32/tab.c
++++ b/dlls/comctl32/tab.c
+@@ -128,7 +128,6 @@ typedef struct
+  * Positioning constants
+  */
+ #define SELECTED_TAB_OFFSET     2
+-#define ROUND_CORNER_SIZE       2
+ #define DISPLAY_AREA_PADDINGX   2
+ #define DISPLAY_AREA_PADDINGY   2
+ #define CONTROL_BORDER_SIZEX    2
+@@ -2135,21 +2134,17 @@ static void TAB_DrawItem(const TAB_INFO *infoPtr, HDC  hdc, INT  iItem)
+ 
+ 	  /* Now erase the top corner and draw diagonal edge */
+ 	  SetBkColor(hdc, corner);
+-	  r1.left = r.right - ROUND_CORNER_SIZE - 1;
++	  r1.left = r.right;
+ 	  r1.top = r.top;
+ 	  r1.right = r.right;
+-	  r1.bottom = r1.top + ROUND_CORNER_SIZE;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.right--;
++	  r1.bottom = r1.top;
+ 	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPLEFT);
+ 
+ 	  /* Now erase the bottom corner and draw diagonal edge */
+-	  r1.left = r.right - ROUND_CORNER_SIZE - 1;
++	  r1.left = r.right;
+ 	  r1.bottom = r.bottom;
+ 	  r1.right = r.right;
+-	  r1.top = r1.bottom - ROUND_CORNER_SIZE;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.right--;
++	  r1.top = r1.bottom;
+ 	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDBOTTOMLEFT);
+ 
+ 	  if ((iItem == infoPtr->iSelected) && (selectedRect.top == 0)) {
+@@ -2176,19 +2171,15 @@ static void TAB_DrawItem(const TAB_INFO *infoPtr, HDC  hdc, INT  iItem)
+ 	  SetBkColor(hdc, corner);
+ 	  r1.left = r.left;
+ 	  r1.top = r.top;
+-	  r1.right = r1.left + ROUND_CORNER_SIZE + 1;
+-	  r1.bottom = r1.top + ROUND_CORNER_SIZE;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.left++;
++	  r1.right = r1.left;
++	  r1.bottom = r1.top;
+ 	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPRIGHT);
+ 
+ 	  /* Now erase the bottom corner and draw diagonal edge */
+ 	  r1.left = r.left;
+ 	  r1.bottom = r.bottom;
+-	  r1.right = r1.left + ROUND_CORNER_SIZE + 1;
+-	  r1.top = r1.bottom - ROUND_CORNER_SIZE;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.left++;
++	  r1.right = r1.left;
++	  r1.top = r1.bottom;
+ 	  DrawEdge(hdc, &r1, EDGE_SUNKEN, BF_DIAGONAL_ENDTOPLEFT);
+         }
+       }
+@@ -2226,21 +2217,17 @@ static void TAB_DrawItem(const TAB_INFO *infoPtr, HDC  hdc, INT  iItem)
+ 
+ 	  /* Now erase the righthand corner and draw diagonal edge */
+ 	  SetBkColor(hdc, corner);
+-	  r1.left = r.right - ROUND_CORNER_SIZE;
++	  r1.left = r.right;
+ 	  r1.bottom = r.bottom;
+ 	  r1.right = r.right;
+-	  r1.top = r1.bottom - ROUND_CORNER_SIZE - 1;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.bottom--;
++	  r1.top = r1.bottom;
+ 	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDBOTTOMLEFT);
+ 
+ 	  /* Now erase the lefthand corner and draw diagonal edge */
+ 	  r1.left = r.left;
+ 	  r1.bottom = r.bottom;
+-	  r1.right = r1.left + ROUND_CORNER_SIZE;
+-	  r1.top = r1.bottom - ROUND_CORNER_SIZE - 1;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.bottom--;
++	  r1.right = r1.left;
++	  r1.top = r1.bottom;
+ 	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPLEFT);
+ 
+ 	  if (iItem == infoPtr->iSelected)
+@@ -2278,21 +2265,17 @@ static void TAB_DrawItem(const TAB_INFO *infoPtr, HDC  hdc, INT  iItem)
+ 
+ 	  /* Now erase the righthand corner and draw diagonal edge */
+ 	  SetBkColor(hdc, corner);
+-	  r1.left = r.right - ROUND_CORNER_SIZE;
++	  r1.left = r.right;
+ 	  r1.top = r.top;
+ 	  r1.right = r.right;
+-	  r1.bottom = r1.top + ROUND_CORNER_SIZE + 1;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.top++;
++	  r1.bottom = r1.top;
+ 	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDBOTTOMRIGHT);
+ 
+ 	  /* Now erase the lefthand corner and draw diagonal edge */
+ 	  r1.left = r.left;
+ 	  r1.top = r.top;
+-	  r1.right = r1.left + ROUND_CORNER_SIZE;
+-	  r1.bottom = r1.top + ROUND_CORNER_SIZE + 1;
+-	  ExtTextOutW(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+-	  r1.top++;
++	  r1.right = r1.left;
++	  r1.bottom = r1.top;
+ 	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPRIGHT);
+         }
+       }
+-- 
+2.53.0
+

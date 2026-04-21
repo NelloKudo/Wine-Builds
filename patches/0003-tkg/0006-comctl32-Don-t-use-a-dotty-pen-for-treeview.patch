@@ -1,0 +1,25 @@
+From 946361121c6d86907c7cd9ad36062459625a62f9 Mon Sep 17 00:00:00 2001
+From: Joshua Ashton <joshua@froggi.es>
+Date: Thu, 16 Jul 2020 10:31:35 +0100
+Subject: [PATCH 6/8] comctl32: Don't use a dotty pen for treeview
+
+---
+ dlls/comctl32/treeview.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dlls/comctl32/treeview.c b/dlls/comctl32/treeview.c
+index 6332040b7f5..40d14212c55 100644
+--- a/dlls/comctl32/treeview.c
++++ b/dlls/comctl32/treeview.c
+@@ -2470,7 +2470,7 @@ TREEVIEW_DrawItemLines(const TREEVIEW_INFO *infoPtr, HDC hdc, const TREEVIEW_ITE
+ 	/* Get a dotted grey pen */
+         lb.lbStyle = BS_SOLID;
+         lb.lbColor = GETLINECOLOR(infoPtr->clrLine);
+-        hNewPen = ExtCreatePen(PS_COSMETIC|PS_ALTERNATE, 1, &lb, 0, NULL);
++        hNewPen = ExtCreatePen(PS_COSMETIC, 1, &lb, 0, NULL);
+ 	hOldPen = SelectObject(hdc, hNewPen);
+ 
+         /* Make sure the center is on a dot (using +2 instead
+-- 
+2.53.0
+
