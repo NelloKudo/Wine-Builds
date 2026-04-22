@@ -320,8 +320,8 @@ compiler_setup() {
         LLVM_MINGW_PATH="/usr/local/llvm-mingw"
         export PATH="${LLVM_MINGW_PATH}/bin:${PATH}"
 
-        export LIBRARY_PATH="${LLVM_MINGW_PATH}/lib:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LIBRARY_PATH:-}"
-        export LD_LIBRARY_PATH="${LLVM_MINGW_PATH}/lib:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LD_LIBRARY_PATH:-}"
+        export LIBRARY_PATH="${LLVM_MINGW_PATH}/lib:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/x86_64/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LIBRARY_PATH:-}"
+        export LD_LIBRARY_PATH="${LLVM_MINGW_PATH}/lib:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/x86_64/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LD_LIBRARY_PATH:-}"
 
         # Compiler settings
         export CC="ccache gcc"
@@ -339,8 +339,8 @@ compiler_setup() {
         GCC_MINGW_PATH="/usr/local/gcc-mingw"
         export PATH="${GCC_MINGW_PATH}/bin:${PATH}"
 
-        export LIBRARY_PATH="/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LIBRARY_PATH:-}"
-        export LD_LIBRARY_PATH="/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LD_LIBRARY_PATH:-}"
+        export LIBRARY_PATH="/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/x86_64/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LIBRARY_PATH:-}"
+        export LD_LIBRARY_PATH="/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14:/usr/lib/gcc-14/lib/gcc/x86_64-linux-gnu/14/32:/usr/lib/gcc-14/lib:/usr/lib/gcc-14/lib32:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/usr/local/x86_64/lib/x86_64-linux-gnu:/usr/local/i386/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:${LD_LIBRARY_PATH:-}"
 
         export CC="ccache gcc"
         export CXX="ccache g++"
@@ -367,7 +367,7 @@ compiler_setup() {
     export CPPFLAGS="-D_GNU_SOURCE -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -DNDEBUG -D_NDEBUG"
     _GCC_FLAGS="${_common_cflags} ${_native_common_cflags} ${CPPFLAGS}"
     _CROSS_FLAGS="${_common_cflags} ${CPPFLAGS}"
-    _LD_FLAGS="${_common_cflags} ${_native_common_cflags} ${CPPFLAGS} -Wl,-O1,--sort-common,--as-needed"
+    _LD_FLAGS="${_common_cflags} ${_native_common_cflags} ${CPPFLAGS} -lrt -Wl,-O1,--sort-common,--as-needed"
     _CROSS_LD_FLAGS="${_common_cflags} ${CPPFLAGS} -Wl,-O1,--sort-common,--as-needed,--file-alignment=4096"
 
     # Compiler and linker flags

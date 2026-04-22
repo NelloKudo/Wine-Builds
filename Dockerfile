@@ -1,3 +1,6 @@
+# kept for testing purposes, see upstream at:
+# https://github.com/NelloKudo/winebuilder-image/blob/steamrt3-legacy/Dockerfile
+
 FROM registry.gitlab.steamos.cloud/proton/sniper/sdk:3.0.20250519.130773-0 AS main-deps
 
 ENV DEBIAN_FRONTEND=noninteractive \

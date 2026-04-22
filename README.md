@@ -11,7 +11,6 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
 
 - Fixes various issues with **certain anime games**, from launch issues to hanging on exit
 - Rebased to **latest wine-cachyos**
-- Bundles all **esync/fsync/ntsync** in the same build, with latter used by default if possible
 - Includes some QoL fixes for dropping inputs, random crashes and alt-tabbing.
 - Includes some backports from upstream Wine
 
@@ -34,6 +33,6 @@ Spritz-Wine builds are available in all [an-anime-team](https://github.com/an-an
 
 ## Builds description
 
-Spritz builds are built in a Docker container based on Proton's SDK, with a few changes you can see in the Dockerfile. The `wine-builder` container is hosted [here](https://hub.docker.com/r/nellokudo/wine-builder), built from its apposite [GitHub CI](https://github.com/NelloKudo/WineBuilder/actions/workflows/dockerhub.yml) from my main repository of [WineBuilder](https://github.com/NelloKudo/WineBuilder).
+Spritz builds are built in a Docker container based on Proton's SDK, with a few changes you can see in the Dockerfile. The `wine-builder` container is hosted [here](https://hub.docker.com/r/nellokudo/wine-builder), built from its apposite [GitHub repository](https://github.com/NelloKudo/winebuilder-image).
 
 Many thanks to spectator's work in the main repository for the polished building process.
