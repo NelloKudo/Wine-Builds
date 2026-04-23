@@ -155,12 +155,17 @@ build_wine() {
         export UNWIND_LIBS="-L/usr/local/lib/ -static-libgcc -l:libunwind.a -l:liblzma.a"
     fi
 
-    # Allow Wine-Wayland to work in Steam Linux Runtime
+    # winewayland moment
     XKBCOMMON_CFLAGS="$(pkg-config --static --cflags xkbcommon)"
-    XKBCOMMON_LIBS="$(pkg-config --static --libs xkbcommon | sed -E 's/-l([^ ]+)/-l:lib\1.a/g')"
+    XKBCOMMON_LIBS="$(pkg-config --static --libs xkbcommon | sed -e 's|-l\([^ ]*\)|-l:lib\1.a|g' -e 's|-l:libm\.a|-lm|g' -e 's|-l:libc\.a|-lc|g' -e 's|-l:libpthread\.a|-lpthread|g')"
     export XKBCOMMON_CFLAGS XKBCOMMON_LIBS
+
+    XKBREGISTRY_CFLAGS="$(pkg-config --static --cflags xkbregistry)"
+    XKBREGISTRY_LIBS="$(pkg-config --static --libs xkbregistry | sed -e 's|-l\([^ ]*\)|-l:lib\1.a|g' -e 's|-l:libm\.a|-lm|g' -e 's|-l:libc\.a|-lc|g' -e 's|-l:libpthread\.a|-lpthread|g')"
+    export XKBREGISTRY_CFLAGS XKBREGISTRY_LIBS
+
     LIBXML2_CFLAGS="$(pkg-config --static --cflags libxml-2.0)"
-    LIBXML2_LIBS="$(pkg-config --static --libs libxml-2.0 | sed -E 's/-l([^ ]+)/-l:lib\1.a/g')"
+    LIBXML2_LIBS="$(pkg-config --static --libs libxml-2.0 | sed -e 's|-l\([^ ]*\)|-l:lib\1.a|g' -e 's|-l:libm\.a|-lm|g' -e 's|-l:libc\.a|-lc|g' -e 's|-l:libpthread\.a|-lpthread|g')"
     export LIBXML2_CFLAGS LIBXML2_LIBS
 
     # Configure and build 64-bit
@@ -174,11 +179,18 @@ build_wine() {
         export PKG_CONFIG_LIBDIR="/usr/local/i386/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig"
         export PKG_CONFIG_PATH="${PKG_CONFIG_LIBDIR}"
         export CROSSCC="${CROSSCC_X32}"
+        
+        # winewayland moment
         XKBCOMMON_CFLAGS="$(pkg-config --static --cflags xkbcommon)"
-        XKBCOMMON_LIBS="$(pkg-config --static --libs xkbcommon | sed -E 's/-l([^ ]+)/-l:lib\1.a/g')"
+        XKBCOMMON_LIBS="$(pkg-config --static --libs xkbcommon | sed -e 's|-l\([^ ]*\)|-l:lib\1.a|g' -e 's|-l:libm\.a|-lm|g' -e 's|-l:libc\.a|-lc|g' -e 's|-l:libpthread\.a|-lpthread|g')"
         export XKBCOMMON_CFLAGS XKBCOMMON_LIBS
+
+        XKBREGISTRY_CFLAGS="$(pkg-config --static --cflags xkbregistry)"
+        XKBREGISTRY_LIBS="$(pkg-config --static --libs xkbregistry | sed -e 's|-l\([^ ]*\)|-l:lib\1.a|g' -e 's|-l:libm\.a|-lm|g' -e 's|-l:libc\.a|-lc|g' -e 's|-l:libpthread\.a|-lpthread|g')"
+        export XKBREGISTRY_CFLAGS XKBREGISTRY_LIBS
+
         LIBXML2_CFLAGS="$(pkg-config --static --cflags libxml-2.0)"
-        LIBXML2_LIBS="$(pkg-config --static --libs libxml-2.0 | sed -E 's/-l([^ ]+)/-l:lib\1.a/g')"
+        LIBXML2_LIBS="$(pkg-config --static --libs libxml-2.0 | sed -e 's|-l\([^ ]*\)|-l:lib\1.a|g' -e 's|-l:libm\.a|-lm|g' -e 's|-l:libc\.a|-lc|g' -e 's|-l:libpthread\.a|-lpthread|g')"
         export LIBXML2_CFLAGS LIBXML2_LIBS
 
         # export I386_LIBS="-latomic" required for older fsync
@@ -375,7 +387,7 @@ compiler_setup() {
     export CPPFLAGS="-D_GNU_SOURCE -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0"
     _GCC_FLAGS="${_common_cflags} ${_native_common_cflags} ${CPPFLAGS}"
     _CROSS_FLAGS="${_common_cflags} ${CPPFLAGS}"
-    _LD_FLAGS="${_common_cflags} ${_native_common_cflags} ${CPPFLAGS} -Wl,-O1,--sort-common,--as-needed"
+    _LD_FLAGS="${_common_cflags} ${_native_common_cflags} ${CPPFLAGS} -Wl,-O1,--sort-common,--as-needed -L/usr/local/x86_64/lib/x86_64-linux-gnu -L/usr/local/lib"
     _CROSS_LD_FLAGS="${_common_cflags} ${CPPFLAGS} -Wl,-O1,--sort-common,--as-needed,--file-alignment=4096"
 
     # Compiler and linker flags
