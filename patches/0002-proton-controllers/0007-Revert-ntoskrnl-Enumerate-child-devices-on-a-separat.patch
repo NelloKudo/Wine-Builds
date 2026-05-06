@@ -1,4 +1,4 @@
-From 43e4f451f7ee2d988bd57bb4f78d8aa88329c47f Mon Sep 17 00:00:00 2001
+From 3d916e632138a31d7b595c31a6bcffe5b42290b5 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Thu, 27 Jul 2023 09:23:11 +0200
 Subject: [PATCH 7/7] Revert "ntoskrnl: Enumerate child devices on a separate
@@ -136,5 +136,5 @@ index ab138f8eaa6..dd5fdd2f631 100644
              return STATUS_SUCCESS;
          }
 -- 
-2.53.0
+2.54.0
 

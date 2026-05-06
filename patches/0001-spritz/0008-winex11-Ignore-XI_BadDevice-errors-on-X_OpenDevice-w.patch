@@ -1,18 +1,18 @@
-From 6286ab8045b3a85b0266e6e0aa6d56ada262debf Mon Sep 17 00:00:00 2001
+From dcd9bab31cc251c36f82f72d21276ac145141fbe Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Sat, 8 Feb 2025 21:45:00 -0800
-Subject: [PATCH 8/9] winex11: Ignore XI_BadDevice errors on X_OpenDevice when
- hotplugging devices.
+Subject: [PATCH 08/10] winex11: Ignore XI_BadDevice errors on X_OpenDevice
+ when hotplugging devices.
 
 ---
  dlls/winex11.drv/x11drv_main.c | 9 +++++++++
  1 file changed, 9 insertions(+)
 
 diff --git a/dlls/winex11.drv/x11drv_main.c b/dlls/winex11.drv/x11drv_main.c
-index 084d1d6824b..2bf8913e6cc 100644
+index 29178980429..bace2d19f0a 100644
 --- a/dlls/winex11.drv/x11drv_main.c
 +++ b/dlls/winex11.drv/x11drv_main.c
-@@ -227,6 +227,15 @@ static inline BOOL ignore_error( Display *display, XErrorEvent *event )
+@@ -225,6 +225,15 @@ static inline BOOL ignore_error( Display *display, XErrorEvent *event )
          }
  #endif
      }
@@ -29,5 +29,5 @@ index 084d1d6824b..2bf8913e6cc 100644
  }
  
 -- 
-2.53.0
+2.54.0
 

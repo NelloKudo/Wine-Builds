@@ -1,4 +1,4 @@
-From 8573a6b97699e12423c15a1c8c8025e1caef9bb9 Mon Sep 17 00:00:00 2001
+From 64219a90770adb5157b379b749188e125405284c Mon Sep 17 00:00:00 2001
 From: Paul Gofman <pgofman@codeweavers.com>
 Date: Wed, 17 Dec 2025 18:37:14 -0600
 Subject: [PATCH 3/6] fsync: Introduce futex-based inproc sync backend.
@@ -34,7 +34,7 @@ rather than the full alternative sync primitives implementation.
  dlls/ntdll/unix/fsync.h        |   47 ++
  dlls/ntdll/unix/server.c       |    9 +-
  dlls/ntdll/unix/sync.c         |   43 +-
- dlls/ntdll/unix/unix_private.h |    2 +
+ dlls/ntdll/unix/unix_private.h |    7 +
  dlls/ntdll/unix/virtual.c      |    1 +
  server/Makefile.in             |    1 +
  server/fsync.c                 |  368 ++++++++++
@@ -44,14 +44,14 @@ rather than the full alternative sync primitives implementation.
  server/process.c               |    3 +
  server/protocol.def            |   23 +
  server/thread.c                |    9 +-
- 16 files changed, 1842 insertions(+), 18 deletions(-)
+ 16 files changed, 1847 insertions(+), 18 deletions(-)
  create mode 100644 dlls/ntdll/unix/fsync.c
  create mode 100644 dlls/ntdll/unix/fsync.h
  create mode 100644 server/fsync.c
  create mode 100644 server/fsync.h
 
 diff --git a/configure.ac b/configure.ac
-index 141a952dec0..648dd792dab 100644
+index 13dca86c55e..50c190379a8 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -737,6 +737,7 @@ AC_CHECK_HEADERS(\
@@ -1356,7 +1356,7 @@ index 00000000000..cc12907fb6a
 +    return fsync_enabled;
 +}
 diff --git a/dlls/ntdll/unix/server.c b/dlls/ntdll/unix/server.c
-index 9fc20b7046e..de6276862ed 100644
+index 686835d4a98..98150b3035b 100644
 --- a/dlls/ntdll/unix/server.c
 +++ b/dlls/ntdll/unix/server.c
 @@ -84,6 +84,8 @@
@@ -1368,7 +1368,7 @@ index 9fc20b7046e..de6276862ed 100644
  WINE_DEFAULT_DEBUG_CHANNEL(server);
  WINE_DECLARE_DEBUG_CHANNEL(syscall);
  
-@@ -1724,7 +1726,12 @@ size_t server_init_process(void)
+@@ -1725,7 +1727,12 @@ size_t server_init_process(void)
              info_size         = reply->info_size;
              server_start_time = reply->server_start;
              supported_machines_count = wine_server_reply_size( reply ) / sizeof(*supported_machines);
@@ -1383,7 +1383,7 @@ index 9fc20b7046e..de6276862ed 100644
                  inproc_device_fd = wine_server_receive_fd( &handle );
                  assert( handle == reply->inproc_device );
 diff --git a/dlls/ntdll/unix/sync.c b/dlls/ntdll/unix/sync.c
-index bc9bbf2c30d..070673c3d29 100644
+index bb7197cf247..f8475a48b10 100644
 --- a/dlls/ntdll/unix/sync.c
 +++ b/dlls/ntdll/unix/sync.c
 @@ -72,6 +72,8 @@
@@ -1486,7 +1486,7 @@ index bc9bbf2c30d..070673c3d29 100644
 -static int get_inproc_alert_fd(void)
 +int get_inproc_alert_fd(void)
  {
-     struct ntdll_thread_data *data = ntdll_get_thread_data();
+     struct thread_data *data = get_thread_data();
      obj_handle_t token;
 @@ -884,8 +907,12 @@ static int get_inproc_alert_fd(void)
          {
@@ -1535,18 +1535,30 @@ index bc9bbf2c30d..070673c3d29 100644
             we never return STATUS_NO_YIELD_PERFORMED */
          if ((status = server_wait( NULL, 0, SELECT_INTERRUPTIBLE | SELECT_ALERTABLE, timeout )) == STATUS_TIMEOUT)
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index 56d62075bcd..f34ca1fb0de 100644
+index 45e0fb5ffe2..0954baf851e 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
-@@ -116,6 +116,7 @@ struct ntdll_thread_data
-     PRTL_THREAD_START_ROUTINE start;         /* thread entry point */
-     void                     *param;         /* thread entry point parameter */
-     void                     *jmp_buf;       /* setjmp buffer for exception handling */
-+    int                      *fsync_apc_futex;
- };
+@@ -111,6 +111,7 @@ struct thread_data
+     BOOL         allow_writes;      /* ThreadAllowWrites flags */
+     pthread_t    pthread_id;        /* pthread thread id */
+     void        *jmp_buf;           /* setjmp buffer for exception handling */
++    int         *fsync_apc_futex;
+     void        *start;             /* thread entry point */
+     void        *param;             /* thread entry point parameter */
+     struct list  entry;             /* entry in TEB list */
+@@ -126,6 +127,11 @@ static inline struct thread_data *get_thread_data(void)
+     return pthread_getspecific( thread_data_key );
+ }
  
- C_ASSERT( sizeof(struct ntdll_thread_data) <= sizeof(((TEB *)0)->GdiTebBatch) );
-@@ -244,6 +245,7 @@ extern unsigned int server_select( const union select_op *select_op, data_size_t
++static inline struct thread_data *ntdll_get_thread_data(void)
++{
++    return get_thread_data();
++}
++
+ /* thread private data, stored in NtCurrentTeb()->GdiTebBatch */
+ struct teb_data
+ {
+@@ -250,6 +256,7 @@ extern unsigned int server_select( const union select_op *select_op, data_size_t
                                     timeout_t abs_timeout, struct context_data *context, struct user_apc *user_apc );
  extern unsigned int server_wait( const union select_op *select_op, data_size_t size, UINT flags,
                                   const LARGE_INTEGER *timeout );
@@ -1555,17 +1567,17 @@ index 56d62075bcd..f34ca1fb0de 100644
  extern unsigned int server_queue_process_apc( HANDLE process, const union apc_call *call,
                                                union apc_result *result );
 diff --git a/dlls/ntdll/unix/virtual.c b/dlls/ntdll/unix/virtual.c
-index 1b9a5f4b3d0..d972aaa144d 100644
+index fd4b08e01ee..5936bcb671f 100644
 --- a/dlls/ntdll/unix/virtual.c
 +++ b/dlls/ntdll/unix/virtual.c
-@@ -4040,6 +4040,7 @@ static TEB *init_teb( void *ptr, BOOL is_wow )
-     thread_data->wait_fd[0] = -1;
-     thread_data->wait_fd[1] = -1;
-     thread_data->alert_fd   = -1;
-+    thread_data->fsync_apc_futex = NULL;
-     list_add_head( &teb_list, &thread_data->entry );
-     return teb;
- }
+@@ -4148,6 +4148,7 @@ struct thread_data *virtual_alloc_thread_data(void)
+         data->wait_fd[0] = -1;
+         data->wait_fd[1] = -1;
+         data->alert_fd   = -1;
++        data->fsync_apc_futex = NULL;
+ #ifdef VALGRIND_STACK_REGISTER
+         VALGRIND_STACK_REGISTER( (char *)data + signal_stack_mask + 1, (char *)data + view->size );
+ #endif
 diff --git a/server/Makefile.in b/server/Makefile.in
 index 84a6bd74d9d..d9ac607f66f 100644
 --- a/server/Makefile.in
@@ -2293,5 +2305,5 @@ index 555dda78fc7..bbb0ac49fe0 100644
      {
          reply->handle = get_thread_id( current ) | 1; /* arbitrary token */
 -- 
-2.53.0
+2.54.0
 

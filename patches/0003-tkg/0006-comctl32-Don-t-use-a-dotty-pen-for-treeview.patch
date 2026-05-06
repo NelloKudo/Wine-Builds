@@ -1,4 +1,4 @@
-From 946361121c6d86907c7cd9ad36062459625a62f9 Mon Sep 17 00:00:00 2001
+From 0024b11bda44cc9b8e0734b7620de23e941018b4 Mon Sep 17 00:00:00 2001
 From: Joshua Ashton <joshua@froggi.es>
 Date: Thu, 16 Jul 2020 10:31:35 +0100
 Subject: [PATCH 6/8] comctl32: Don't use a dotty pen for treeview
@@ -21,5 +21,5 @@ index 6332040b7f5..40d14212c55 100644
  
          /* Make sure the center is on a dot (using +2 instead
 -- 
-2.53.0
+2.54.0
 

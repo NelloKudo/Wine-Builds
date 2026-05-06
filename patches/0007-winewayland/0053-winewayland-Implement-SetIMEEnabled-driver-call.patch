@@ -1,17 +1,17 @@
-From 98228b330416c5c3bedde484c4fce3ed64441989 Mon Sep 17 00:00:00 2001
+From 81a2475d7f744918871a4d8df0e8873f564937d5 Mon Sep 17 00:00:00 2001
 From: Ziia Shi <mkrsym1@gmail.com>
 Date: Sun, 1 Feb 2026 01:56:27 +0100
-Subject: [PATCH 2/4] winewayland: Implement SetIMEEnabled driver call.
+Subject: [PATCH 53/55] winewayland: Implement SetIMEEnabled driver call.
 
 ---
- dlls/winewayland.drv/wayland_text_input.c | 92 ++++++++++++++++++++---
+ dlls/winewayland.drv/wayland_text_input.c | 95 ++++++++++++++++++++---
  dlls/winewayland.drv/waylanddrv.h         |  4 +
  dlls/winewayland.drv/waylanddrv_main.c    |  1 +
  dlls/winewayland.drv/window.c             |  2 +
- 4 files changed, 88 insertions(+), 11 deletions(-)
+ 4 files changed, 91 insertions(+), 11 deletions(-)
 
 diff --git a/dlls/winewayland.drv/wayland_text_input.c b/dlls/winewayland.drv/wayland_text_input.c
-index f92f051f918..a4ee4b0fec2 100644
+index f92f051f918..dd740ebf147 100644
 --- a/dlls/winewayland.drv/wayland_text_input.c
 +++ b/dlls/winewayland.drv/wayland_text_input.c
 @@ -77,10 +77,40 @@ static void wayland_text_input_reset_all_state(struct wayland_text_input *text_i
@@ -125,11 +125,14 @@ index f92f051f918..a4ee4b0fec2 100644
      {
          wayland_win_data_release(data);
          goto err;
-@@ -266,3 +294,45 @@ err:
+@@ -266,3 +294,48 @@ err:
      pthread_mutex_unlock(&text_input->mutex);
      return FALSE;
  }
 +
++/***********************************************************************
++ *      SetIMEEnabled (WAYLANDDRV.@)
++ */
 +BOOL WAYLAND_SetIMEEnabled(HWND hwnd, BOOL enabled)
 +{
 +    struct wayland_text_input *text_input = &process_wayland.text_input;
@@ -172,10 +175,10 @@ index f92f051f918..a4ee4b0fec2 100644
 +    return FALSE;
 +}
 diff --git a/dlls/winewayland.drv/waylanddrv.h b/dlls/winewayland.drv/waylanddrv.h
-index 3b0c300a1f6..5924201ef89 100644
+index 1e871413f88..940ff1d7a31 100644
 --- a/dlls/winewayland.drv/waylanddrv.h
 +++ b/dlls/winewayland.drv/waylanddrv.h
-@@ -129,6 +129,7 @@ struct wayland_text_input
+@@ -175,6 +175,7 @@ struct wayland_text_input
      } preedit, current_preedit;
      WCHAR *commit_string;
      HWND focused_hwnd;
@@ -183,7 +186,7 @@ index 3b0c300a1f6..5924201ef89 100644
      pthread_mutex_t mutex;
  };
  
-@@ -372,6 +373,8 @@ struct wayland_win_data
+@@ -477,6 +478,8 @@ struct wayland_win_data
      BOOL is_fullscreen;
      BOOL managed;
      BOOL layered_attribs_set;
@@ -192,28 +195,28 @@ index 3b0c300a1f6..5924201ef89 100644
  };
  
  struct wayland_win_data *wayland_win_data_get(HWND hwnd);
-@@ -444,6 +447,7 @@ BOOL WAYLAND_ClipCursor(const RECT *clip, BOOL reset);
- LRESULT WAYLAND_DesktopWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+@@ -561,6 +564,7 @@ LRESULT WAYLAND_DesktopWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
  void WAYLAND_DestroyWindow(HWND hwnd);
+ void WAYLAND_FlashWindowEx(FLASHWINFO *info);
  BOOL WAYLAND_SetIMECompositionRect(HWND hwnd, RECT rect);
 +BOOL WAYLAND_SetIMEEnabled(HWND hwnd, BOOL enable);
  void WAYLAND_SetCursor(HWND hwnd, HCURSOR hcursor);
  BOOL WAYLAND_SetCursorPos(INT x, INT y);
  void WAYLAND_SetLayeredWindowAttributes(HWND hwnd, COLORREF key, BYTE alpha, DWORD flags);
 diff --git a/dlls/winewayland.drv/waylanddrv_main.c b/dlls/winewayland.drv/waylanddrv_main.c
-index cbbaf729560..9c601f52d49 100644
+index b1bf31678c1..56fc22f7fa5 100644
 --- a/dlls/winewayland.drv/waylanddrv_main.c
 +++ b/dlls/winewayland.drv/waylanddrv_main.c
-@@ -39,6 +39,7 @@ static const struct user_driver_funcs waylanddrv_funcs =
-     .pDesktopWindowProc = WAYLAND_DesktopWindowProc,
+@@ -40,6 +40,7 @@ static const struct user_driver_funcs waylanddrv_funcs =
      .pDestroyWindow = WAYLAND_DestroyWindow,
+     .pFlashWindowEx = WAYLAND_FlashWindowEx,
      .pSetIMECompositionRect = WAYLAND_SetIMECompositionRect,
 +    .pSetIMEEnabled = WAYLAND_SetIMEEnabled,
      .pKbdLayerDescriptor = WAYLAND_KbdLayerDescriptor,
      .pReleaseKbdTables = WAYLAND_ReleaseKbdTables,
      .pSetCursor = WAYLAND_SetCursor,
 diff --git a/dlls/winewayland.drv/window.c b/dlls/winewayland.drv/window.c
-index 2c3d1f87408..25a5f26909c 100644
+index 62f843fa7c2..87d31ef1bb4 100644
 --- a/dlls/winewayland.drv/window.c
 +++ b/dlls/winewayland.drv/window.c
 @@ -71,6 +71,8 @@ static struct wayland_win_data *wayland_win_data_create(HWND hwnd, const struct
@@ -222,9 +225,9 @@ index 2c3d1f87408..25a5f26909c 100644
      data->rects = *rects;
 +    data->ime_enabled = FALSE;
 +    data->num_ime_children = 0;
+     list_init( &data->client_surface_cache );
  
      pthread_mutex_lock(&win_data_mutex);
- 
 -- 
-2.53.0
+2.54.0
 

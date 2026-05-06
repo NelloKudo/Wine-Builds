@@ -1,0 +1,101 @@
+From f9f7cd8bd98835642ea4dd02c53af344c63c1fca Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
+Date: Tue, 3 Dec 2024 12:46:56 +0100
+Subject: [PATCH 02/19] win32u: Add a new driver entry to check window manager
+ name.
+
+---
+ dlls/win32u/driver.c      | 12 ++++++++++++
+ dlls/winex11.drv/init.c   |  1 +
+ dlls/winex11.drv/window.c |  6 ++++++
+ include/wine/gdi_driver.h |  1 +
+ 4 files changed, 20 insertions(+)
+
+diff --git a/dlls/win32u/driver.c b/dlls/win32u/driver.c
+index 4d9708f377c..75de5a2eb4e 100644
+--- a/dlls/win32u/driver.c
++++ b/dlls/win32u/driver.c
+@@ -786,6 +786,11 @@ static void nulldrv_FlashWindowEx( FLASHWINFO *info )
+ {
+ }
+ 
++static BOOL nulldrv_HasWindowManager( const char *name )
++{
++    return FALSE;
++}
++
+ static void nulldrv_GetDC( HDC hdc, HWND hwnd, HWND top_win, const RECT *win_rect,
+                            const RECT *top_rect, DWORD flags )
+ {
+@@ -1204,6 +1209,11 @@ static void loaderdrv_FlashWindowEx( FLASHWINFO *info )
+     load_driver()->pFlashWindowEx( info );
+ }
+ 
++static BOOL loaderdrv_HasWindowManager( const char *name )
++{
++    return load_driver()->pHasWindowManager( name );
++}
++
+ static void loaderdrv_SetDesktopWindow( HWND hwnd )
+ {
+     load_driver()->pSetDesktopWindow( hwnd );
+@@ -1282,6 +1292,7 @@ static const struct user_driver_funcs lazy_load_driver =
+     nulldrv_DesktopWindowProc,
+     nulldrv_DestroyWindow,
+     loaderdrv_FlashWindowEx,
++    loaderdrv_HasWindowManager,
+     loaderdrv_GetDC,
+     nulldrv_ProcessEvents,
+     nulldrv_ReleaseDC,
+@@ -1381,6 +1392,7 @@ void __wine_set_user_driver( const struct user_driver_funcs *funcs, UINT version
+     SET_USER_FUNC(DesktopWindowProc);
+     SET_USER_FUNC(DestroyWindow);
+     SET_USER_FUNC(FlashWindowEx);
++    SET_USER_FUNC(HasWindowManager);
+     SET_USER_FUNC(GetDC);
+     SET_USER_FUNC(ProcessEvents);
+     SET_USER_FUNC(ReleaseDC);
+diff --git a/dlls/winex11.drv/init.c b/dlls/winex11.drv/init.c
+index 09ef2bf8664..4773819fa6a 100644
+--- a/dlls/winex11.drv/init.c
++++ b/dlls/winex11.drv/init.c
+@@ -689,6 +689,7 @@ static const struct user_driver_funcs x11drv_funcs =
+     .pDesktopWindowProc = X11DRV_DesktopWindowProc,
+     .pDestroyWindow = X11DRV_DestroyWindow,
+     .pFlashWindowEx = X11DRV_FlashWindowEx,
++    .pHasWindowManager = X11DRV_HasWindowManager,
+     .pGetDC = X11DRV_GetDC,
+     .pProcessEvents = X11DRV_ProcessEvents,
+     .pReleaseDC = X11DRV_ReleaseDC,
+diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
+index 933781b4d99..e2112ccb5a6 100644
+--- a/dlls/winex11.drv/window.c
++++ b/dlls/winex11.drv/window.c
+@@ -3769,6 +3769,12 @@ void net_supported_init( struct x11drv_thread_data *data )
+     }
+ }
+ 
++BOOL X11DRV_HasWindowManager( const char *name )
++{
++    struct x11drv_thread_data *data = x11drv_init_thread_data();
++    return data->window_manager && !strcmp( data->window_manager, name );
++}
++
+ void init_win_context(void)
+ {
+     init_recursive_mutex( &win_data_mutex );
+diff --git a/include/wine/gdi_driver.h b/include/wine/gdi_driver.h
+index 97c646d6ec9..4cb6b01560a 100644
+--- a/include/wine/gdi_driver.h
++++ b/include/wine/gdi_driver.h
+@@ -400,6 +400,7 @@ struct user_driver_funcs
+     LRESULT (*pDesktopWindowProc)(HWND,UINT,WPARAM,LPARAM);
+     void    (*pDestroyWindow)(HWND);
+     void    (*pFlashWindowEx)(FLASHWINFO*);
++    BOOL    (*pHasWindowManager)(const char *);
+     void    (*pGetDC)(HDC,HWND,HWND,const RECT *,const RECT *,DWORD);
+     BOOL    (*pProcessEvents)(DWORD);
+     void    (*pReleaseDC)(HWND,HDC);
+-- 
+2.54.0
+

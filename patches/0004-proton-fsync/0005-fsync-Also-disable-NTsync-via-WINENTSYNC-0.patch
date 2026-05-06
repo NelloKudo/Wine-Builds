@@ -1,4 +1,4 @@
-From 4bb509be4fb35ec0355e7c5afce71f37fd4cd015 Mon Sep 17 00:00:00 2001
+From 197868318be908694b067de3cba4156234154fe9 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Fri, 17 Apr 2026 05:03:11 +0200
 Subject: [PATCH 5/6] fsync: Also disable NTsync via WINENTSYNC=0.
@@ -22,5 +22,5 @@ index 14c52363c53..2ca4cb39bd3 100644
          else
              fd = open( "/dev/ntsync", O_CLOEXEC | O_RDONLY );
 -- 
-2.53.0
+2.54.0
 

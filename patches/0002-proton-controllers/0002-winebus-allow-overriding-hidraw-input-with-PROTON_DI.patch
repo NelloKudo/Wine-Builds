@@ -1,4 +1,4 @@
-From 881aa1c4d228287775a3a1f5e22ad41862e0da57 Mon Sep 17 00:00:00 2001
+From 729e65902391d117757d97a5e11c8e4c3cff0bd4 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Mon, 15 Sep 2025 15:44:20 +0200
 Subject: [PATCH 2/7] winebus: allow overriding hidraw/input with
@@ -95,5 +95,5 @@ index 0830a75016b..f43318b62a4 100644
          CloseHandle(token);
      }
 -- 
-2.53.0
+2.54.0
 

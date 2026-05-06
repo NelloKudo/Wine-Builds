@@ -1,4 +1,4 @@
-From 24da87ada8bcd6789302717bd22b799c0fec9836 Mon Sep 17 00:00:00 2001
+From 6c5a405cba5ddd5f05b4919ea4636b8b17e55fdc Mon Sep 17 00:00:00 2001
 From: Joshua Ashton <joshua@froggi.es>
 Date: Thu, 16 Jul 2020 09:34:57 +0100
 Subject: [PATCH 3/8] user32: Update system colors
@@ -9,7 +9,7 @@ Signed-off-by: Joshua Ashton <joshua@froggi.es>
  1 file changed, 23 insertions(+), 23 deletions(-)
 
 diff --git a/dlls/win32u/sysparams.c b/dlls/win32u/sysparams.c
-index 6490dcba446..827f9e01d36 100644
+index 00fe10f30ca..8043dcb0221 100644
 --- a/dlls/win32u/sysparams.c
 +++ b/dlls/win32u/sysparams.c
 @@ -5712,37 +5712,37 @@ static char spi_loaded[SPI_INDEX_COUNT];
@@ -74,5 +74,5 @@ index 6490dcba446..827f9e01d36 100644
  };
  
 -- 
-2.53.0
+2.54.0
 

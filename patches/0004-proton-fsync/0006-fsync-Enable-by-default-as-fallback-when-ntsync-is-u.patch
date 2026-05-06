@@ -1,4 +1,4 @@
-From 4254f57fcc51bbfd479bc2617839efd99298348d Mon Sep 17 00:00:00 2001
+From 2a2ea8b78f135dda7141f3eac8eb7f878d122742 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Fri, 17 Apr 2026 05:13:30 +0200
 Subject: [PATCH 6/6] fsync: Enable by default as fallback when ntsync is
@@ -79,5 +79,5 @@ index 7f3930ed31f..5ef9fd00dd8 100644
      set_current_time();
      init_signals();
 -- 
-2.53.0
+2.54.0
 

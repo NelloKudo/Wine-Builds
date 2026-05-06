@@ -1,0 +1,194 @@
+From 980c53acbbc481072d788ef028623d0b2e620076 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
+Date: Tue, 3 Dec 2024 09:58:18 +0100
+Subject: [PATCH 01/19] winex11: Keep track of the window manager name.
+
+---
+ dlls/winex11.drv/event.c       | 14 +++++++++
+ dlls/winex11.drv/window.c      | 56 ++++++++++++++++++++++++++++++++++
+ dlls/winex11.drv/x11drv.h      |  5 +++
+ dlls/winex11.drv/x11drv_main.c |  4 +++
+ 4 files changed, 79 insertions(+)
+
+diff --git a/dlls/winex11.drv/event.c b/dlls/winex11.drv/event.c
+index 6f553c52f06..81f470db3dc 100644
+--- a/dlls/winex11.drv/event.c
++++ b/dlls/winex11.drv/event.c
+@@ -1322,6 +1322,19 @@ static void handle_wm_normal_hints_notify( HWND hwnd, XPropertyEvent *event )
+     release_win_data( data );
+ }
+ 
++static void handle_net_supporting_wm_check_notify( XPropertyEvent *event )
++{
++    struct x11drv_thread_data *data = x11drv_thread_data();
++
++    if (data->window_manager)
++    {
++        XFree( data->window_manager );
++        data->window_manager = NULL;
++    }
++
++    if (event->state == PropertyNewValue) net_supporting_wm_check_init( data );
++}
++
+ static void handle_net_supported_notify( XPropertyEvent *event )
+ {
+     struct x11drv_thread_data *data = x11drv_thread_data();
+@@ -1359,6 +1372,7 @@ static BOOL X11DRV_PropertyNotify( HWND hwnd, XEvent *xev )
+     if (event->atom == x11drv_atom(WM_HINTS)) handle_wm_hints_notify( hwnd, event );
+     if (event->atom == x11drv_atom(_MOTIF_WM_HINTS)) handle_mwm_hints_notify( hwnd, event );
+     if (event->atom == x11drv_atom(WM_NORMAL_HINTS)) handle_wm_normal_hints_notify( hwnd, event );
++    if (event->atom == x11drv_atom(_NET_SUPPORTING_WM_CHECK)) handle_net_supporting_wm_check_notify( event );
+     if (event->atom == x11drv_atom(_NET_SUPPORTED)) handle_net_supported_notify( event );
+     if (event->atom == x11drv_atom(_NET_ACTIVE_WINDOW)) handle_net_active_window( event );
+ 
+diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
+index 33dc2b5a8e0..933781b4d99 100644
+--- a/dlls/winex11.drv/window.c
++++ b/dlls/winex11.drv/window.c
+@@ -3696,6 +3696,62 @@ void X11DRV_FlashWindowEx( FLASHWINFO *pfinfo )
+     release_win_data( data );
+ }
+ 
++static Window get_net_supporting_wm_check( Display *display, Window window )
++{
++    unsigned long count, remaining;
++    Window support = None, *data = NULL;
++    int format, ret;
++    Atom type;
++
++    X11DRV_expect_error( display, host_window_error, NULL );
++    ret = XGetWindowProperty( display, window, x11drv_atom(_NET_SUPPORTING_WM_CHECK), 0, 1, False, XA_WINDOW,
++                              &type, &format, &count, &remaining, (unsigned char **)&data );
++    if (!X11DRV_check_error() && !ret && type == XA_WINDOW && format == 32 && count >= 1) support = *data;
++    if (data) XFree( data );
++    return support;
++}
++
++static BOOL get_window_net_wm_name( Display *display, Window window, char **name )
++{
++    unsigned long count, remaining;
++    int format, ret;
++    Atom type;
++
++    *name = NULL;
++    X11DRV_expect_error( display, host_window_error, NULL );
++    ret = XGetWindowProperty( display, window, x11drv_atom(_NET_WM_NAME), 0, 65536 / sizeof(CARD32), False, x11drv_atom(UTF8_STRING),
++                              &type, &format, &count, &remaining, (unsigned char **)name );
++    return !X11DRV_check_error() && !ret && *name;
++}
++
++static BOOL get_window_wm_name( Display *display, Window window, char **name )
++{
++    unsigned long count, remaining;
++    int format, ret;
++    Atom type;
++
++    *name = NULL;
++    X11DRV_expect_error( display, host_window_error, NULL );
++    ret = XGetWindowProperty( display, window, x11drv_atom(WM_NAME), 0, 65536 / sizeof(CARD32), False, XA_STRING,
++                              &type, &format, &count, &remaining, (unsigned char **)name );
++    return !X11DRV_check_error() && !ret && *name;
++}
++
++void net_supporting_wm_check_init( struct x11drv_thread_data *data )
++{
++    Window window = None, other;
++
++    if (!(window = get_net_supporting_wm_check( data->display, DefaultRootWindow( data->display ) ))) return;
++    other = get_net_supporting_wm_check( data->display, window );
++    if (window != other) WARN( "Invalid _NET_SUPPORTING_WM_CHECK window\n" );
++    else if (get_window_net_wm_name( data->display, window, &data->window_manager ) ||
++             get_window_wm_name( data->display, window, &data->window_manager ))
++    {
++        if (!strcmp( data->window_manager, "GNOME Shell" )) strcpy( data->window_manager, "Mutter" );
++        TRACE( "Detected window manager: %s\n", debugstr_a(data->window_manager) );
++    }
++}
++
+ void net_supported_init( struct x11drv_thread_data *data )
+ {
+     unsigned long count, remaining;
+diff --git a/dlls/winex11.drv/x11drv.h b/dlls/winex11.drv/x11drv.h
+index 1a036fbbfd3..8138011aa11 100644
+--- a/dlls/winex11.drv/x11drv.h
++++ b/dlls/winex11.drv/x11drv.h
+@@ -229,6 +229,7 @@ extern BOOL X11DRV_CreateWindow( HWND hwnd );
+ extern LRESULT X11DRV_DesktopWindowProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp );
+ extern void X11DRV_DestroyWindow( HWND hwnd );
+ extern void X11DRV_FlashWindowEx( PFLASHWINFO pfinfo );
++extern BOOL X11DRV_HasWindowManager( const char *name );
+ extern void X11DRV_GetDC( HDC hdc, HWND hwnd, HWND top, const RECT *win_rect,
+                           const RECT *top_rect, DWORD flags );
+ extern void X11DRV_ReleaseDC( HWND hwnd, HDC hdc );
+@@ -414,6 +415,7 @@ struct x11drv_thread_data
+     Atom    *net_supported;        /* list of _NET_SUPPORTED atoms */
+     int      net_supported_count;  /* number of _NET_SUPPORTED atoms */
+     UINT     net_wm_state_mask;    /* mask of supported _NET_WM_STATE *bits */
++    char    *window_manager;       /* name of the supporting window manager */
+ #ifdef HAVE_X11_EXTENSIONS_XINPUT2_H
+     XIValuatorClassInfo x_valuator;
+     XIValuatorClassInfo y_valuator;
+@@ -502,6 +504,7 @@ enum x11drv_atoms
+     XATOM_WM_PROTOCOLS,
+     XATOM_WM_DELETE_WINDOW,
+     XATOM_WM_HINTS,
++    XATOM_WM_NAME,
+     XATOM_WM_NORMAL_HINTS,
+     XATOM_WM_STATE,
+     XATOM_WM_TAKE_FOCUS,
+@@ -514,6 +517,7 @@ enum x11drv_atoms
+     XATOM__NET_STARTUP_INFO_BEGIN,
+     XATOM__NET_STARTUP_INFO,
+     XATOM__NET_SUPPORTED,
++    XATOM__NET_SUPPORTING_WM_CHECK,
+     XATOM__NET_SYSTEM_TRAY_OPCODE,
+     XATOM__NET_SYSTEM_TRAY_S0,
+     XATOM__NET_SYSTEM_TRAY_VISUAL,
+@@ -719,6 +723,7 @@ extern Window get_net_active_window( Display *display );
+ extern void net_active_window_notify( unsigned long serial, Window window, Time time );
+ extern void net_active_window_init( struct x11drv_thread_data *data );
+ extern void net_supported_init( struct x11drv_thread_data *data );
++extern void net_supporting_wm_check_init( struct x11drv_thread_data *data );
+ extern BOOL is_net_supported( Atom atom );
+ 
+ extern Window init_clip_window(void);
+diff --git a/dlls/winex11.drv/x11drv_main.c b/dlls/winex11.drv/x11drv_main.c
+index fca05fe5334..4c0407ffb20 100644
+--- a/dlls/winex11.drv/x11drv_main.c
++++ b/dlls/winex11.drv/x11drv_main.c
+@@ -120,6 +120,7 @@ const char * const X11DRV_atom_names[NB_XATOMS - FIRST_XATOM] =
+     "WM_PROTOCOLS",
+     "WM_DELETE_WINDOW",
+     "WM_HINTS",
++    "WM_NAME",
+     "WM_NORMAL_HINTS",
+     "WM_STATE",
+     "WM_TAKE_FOCUS",
+@@ -132,6 +133,7 @@ const char * const X11DRV_atom_names[NB_XATOMS - FIRST_XATOM] =
+     "_NET_STARTUP_INFO_BEGIN",
+     "_NET_STARTUP_INFO",
+     "_NET_SUPPORTED",
++    "_NET_SUPPORTING_WM_CHECK",
+     "_NET_SYSTEM_TRAY_OPCODE",
+     "_NET_SYSTEM_TRAY_S0",
+     "_NET_SYSTEM_TRAY_VISUAL",
+@@ -694,6 +696,7 @@ void X11DRV_ThreadDetach(void)
+         if (data->xim) XCloseIM( data->xim );
+         if (data->font_set) XFreeFontSet( data->display, data->font_set );
+         if (data->net_supported) XFree( data->net_supported );
++        if (data->window_manager) XFree( data->window_manager );
+         XSync( gdi_display, False ); /* make sure XReparentWindow requests have completed before closing the thread display */
+         XCloseDisplay( data->display );
+         free( data );
+@@ -762,6 +765,7 @@ struct x11drv_thread_data *x11drv_init_thread_data(void)
+     if (use_xim) xim_thread_attach( data );
+     x11drv_xinput2_init( data );
+     net_supported_init( data );
++    net_supporting_wm_check_init( data );
+     net_active_window_init( data );
+ 
+     return data;
+-- 
+2.54.0
+

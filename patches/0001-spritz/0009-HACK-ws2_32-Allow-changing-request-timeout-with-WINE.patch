@@ -1,20 +1,20 @@
-From d213e972563f09f73f5d2b4103ced5a2701c3363 Mon Sep 17 00:00:00 2001
+From de002bc0d9339eae03e9935ede40d12d719e544a Mon Sep 17 00:00:00 2001
 From: teapot4195 <teapot4195@gmail.com>
 Date: Wed, 15 Apr 2026 22:19:21 +0200
-Subject: [PATCH 9/9] HACK: ws2_32: Allow changing request timeout with
+Subject: [PATCH 09/10] HACK: ws2_32: Allow changing request timeout with
  WINE_ENABLE_TIMEOUT_FIX=1.
 
 Co-authored-by: NelloKudo <marshnelloosu@gmail.com>
 Co-authored-by: Lily <lily@dawn.wine>
 ---
- dlls/ws2_32/socket.c | 61 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 61 insertions(+)
+ dlls/ws2_32/socket.c | 62 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 62 insertions(+)
 
 diff --git a/dlls/ws2_32/socket.c b/dlls/ws2_32/socket.c
-index f9be8bedcc7..e47f392c32d 100644
+index f9be8bedcc7..ad49a588b2d 100644
 --- a/dlls/ws2_32/socket.c
 +++ b/dlls/ws2_32/socket.c
-@@ -4090,6 +4090,65 @@ int WINAPI WSAAsyncSelect( SOCKET s, HWND window, UINT message, LONG mask )
+@@ -4090,6 +4090,66 @@ int WINAPI WSAAsyncSelect( SOCKET s, HWND window, UINT message, LONG mask )
      return status ? -1 : 0;
  }
  
@@ -32,7 +32,8 @@ index f9be8bedcc7..e47f392c32d 100644
 +        if ((p = wcsrchr(name, '\\')))
 +            name = p + 1;
 +        ret = (env && atoi(env)) &&
-+              (!wcsicmp(name, L"GenshinImpact.exe") || !wcsicmp(name, L"YuanShen.exe"));
++              (!wcsicmp(name, L"GenshinImpact.exe") || !wcsicmp(name, L"YuanShen.exe")
++               || !wcsicmp(name, L"ZenlessZoneZero.exe"));
 +        cache = ret;
 +    }
 +    return ret;
@@ -80,7 +81,7 @@ index f9be8bedcc7..e47f392c32d 100644
  
  /***********************************************************************
   *      WSACreateEvent          (WS2_32.31)
-@@ -4100,6 +4159,8 @@ WSAEVENT WINAPI WSACreateEvent(void)
+@@ -4100,6 +4160,8 @@ WSAEVENT WINAPI WSACreateEvent(void)
      /* Create a manual-reset event, with initial state: unsignaled */
      TRACE("\n");
  
@@ -90,5 +91,5 @@ index f9be8bedcc7..e47f392c32d 100644
  }
  
 -- 
-2.53.0
+2.54.0
 

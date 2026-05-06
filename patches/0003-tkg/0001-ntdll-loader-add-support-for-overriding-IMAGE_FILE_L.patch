@@ -1,4 +1,4 @@
-From 45b0f2e574ae53601b6d5f498d6de831afbad6de Mon Sep 17 00:00:00 2001
+From cdf832e759ab0e8e33599eebb8ae545b04610217 Mon Sep 17 00:00:00 2001
 From: Steven Noonan <steven@valvesoftware.com>
 Date: Wed, 17 Oct 2018 04:13:37 -0700
 Subject: [PATCH 1/8] ntdll/loader: add support for overriding
@@ -80,10 +80,10 @@ index 954ace7824e..3e8730b0e72 100644
  DEFINE_SYSCALL(NtAccessCheck, (PSECURITY_DESCRIPTOR descr, HANDLE token, ACCESS_MASK access, GENERIC_MAPPING *mapping, PRIVILEGE_SET *privs, ULONG *retlen, ULONG *access_granted, NTSTATUS *access_status))
  DEFINE_SYSCALL(NtAccessCheckAndAuditAlarm, (UNICODE_STRING *subsystem, HANDLE handle, UNICODE_STRING *typename, UNICODE_STRING *objectname, PSECURITY_DESCRIPTOR descr, ACCESS_MASK access, GENERIC_MAPPING *mapping, BOOLEAN creation, ACCESS_MASK *access_granted, NTSTATUS *access_status, BOOLEAN *onclose))
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index 7d5d660f566..eea0670f0f0 100644
+index f698764125f..c0ce39101ef 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
-@@ -707,4 +707,6 @@ static inline int is_gdt_sel( WORD sel )
+@@ -729,4 +729,6 @@ static inline int is_gdt_sel( WORD sel )
  
  #endif  /* defined(__i386__) || defined(__x86_64__) */
  
@@ -91,10 +91,10 @@ index 7d5d660f566..eea0670f0f0 100644
 +
  #endif /* __NTDLL_UNIX_PRIVATE_H */
 diff --git a/dlls/ntdll/unix/virtual.c b/dlls/ntdll/unix/virtual.c
-index e498c3d9903..1b9a5f4b3d0 100644
+index c21bd7e07a3..fd4b08e01ee 100644
 --- a/dlls/ntdll/unix/virtual.c
 +++ b/dlls/ntdll/unix/virtual.c
-@@ -5044,6 +5044,24 @@ static void virtual_release_address_space(void)
+@@ -5075,6 +5075,24 @@ static void virtual_release_address_space(void)
  
  #endif  /* _WIN64 */
  
@@ -119,7 +119,7 @@ index e498c3d9903..1b9a5f4b3d0 100644
  
  /***********************************************************************
   *           virtual_set_large_address_space
-@@ -5063,11 +5081,11 @@ void virtual_set_large_address_space(void)
+@@ -5094,11 +5112,11 @@ void virtual_set_large_address_space(void)
                  free_reserved_memory( 0, (char *)0x7ffe0000 );
  #endif
          }
@@ -148,5 +148,5 @@ index 644c3ae9945..6ad8b89880b 100644
 +    return __wine_needs_override_large_address_aware();
 +}
 -- 
-2.53.0
+2.54.0
 

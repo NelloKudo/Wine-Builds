@@ -1,4 +1,4 @@
-From 49bbd86c62860fe7bbcc2710fb387a9b0b6680cf Mon Sep 17 00:00:00 2001
+From f99c3730dc84998912c1b36e4a252bd95fda41ee Mon Sep 17 00:00:00 2001
 From: William Horvath <william@horvath.blog>
 Date: Sat, 28 Dec 2024 06:45:10 -0800
 Subject: [PATCH 1/2] ntdll: Never use CLOCK_REALTIME_COARSE.
@@ -12,7 +12,7 @@ performance degradation by using CLOCK_REALTIME instead.
  1 file changed, 1 insertion(+), 16 deletions(-)
 
 diff --git a/dlls/ntdll/unix/sync.c b/dlls/ntdll/unix/sync.c
-index eddffe5d21d..d083cee5e82 100644
+index 59da823960f..36aba8a0448 100644
 --- a/dlls/ntdll/unix/sync.c
 +++ b/dlls/ntdll/unix/sync.c
 @@ -2521,22 +2521,7 @@ NTSTATUS WINAPI NtQuerySystemTime( LARGE_INTEGER *time )
@@ -40,5 +40,5 @@ index eddffe5d21d..d083cee5e82 100644
          time->QuadPart = ticks_from_time_t( ts.tv_sec ) + (ts.tv_nsec + 50) / 100;
      }
 -- 
-2.53.0
+2.54.0
 

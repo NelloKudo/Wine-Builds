@@ -1,4 +1,4 @@
-From 2ddf76e80fcda434a2660e80e2ebd96db0e4f4b3 Mon Sep 17 00:00:00 2001
+From fd05a3b94255892c2dc979466f46ff5beb08190d Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Mon, 15 Sep 2025 17:07:35 +0200
 Subject: [PATCH 3/7] winebus: disable Hidraw by default, add log message
@@ -35,5 +35,5 @@ index f449271a549..b61fc140a10 100644
      options.disable_input = check_bus_option(L"DisableInput", 0);
      if (options.disable_input) TRACE("UDEV input devices disabled in registry\n");
 -- 
-2.53.0
+2.54.0
 

@@ -1,7 +1,7 @@
-From 668d37a5b3edc95da77cc6314336164b37be463e Mon Sep 17 00:00:00 2001
+From 2704f66f132ddcdead1df3959bf9e35d04038482 Mon Sep 17 00:00:00 2001
 From: NelloKudo <marshnelloosu@gmail.com>
 Date: Thu, 14 Aug 2025 14:18:26 +0200
-Subject: [PATCH 2/9] HACK: ws2_32: Block first internet connection for some
+Subject: [PATCH 02/10] HACK: ws2_32: Block first internet connection for some
  games
 
 Fixes launch issues/high CPU usage, can be disabled in-case of
@@ -64,5 +64,5 @@ index 1b3730aa693..f9be8bedcc7 100644
      char *unix_path = NULL;
      int unix_varargs_size = 0;
 -- 
-2.53.0
+2.54.0
 

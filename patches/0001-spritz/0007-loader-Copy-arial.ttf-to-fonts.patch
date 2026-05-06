@@ -1,7 +1,7 @@
-From c68c41fb03bd34baf521ecfbbcfab1051d456b57 Mon Sep 17 00:00:00 2001
+From 22cb64e0de80daea8040e2903be4fdbf60e754f1 Mon Sep 17 00:00:00 2001
 From: mkrsym1 <mkrsym1@gmail.com>
 Date: Mon, 8 Sep 2025 21:05:27 +0200
-Subject: [PATCH 7/9] loader: Copy arial.ttf to fonts
+Subject: [PATCH 07/10] loader: Copy arial.ttf to fonts
 
 ---
  loader/wine.inf.in | 9 +++++++--
@@ -50,5 +50,5 @@ index c5116132839..a215c3ed220 100644
  WinmdFiles = 11,winmetadata
 +FontFiles = 20
 -- 
-2.53.0
+2.54.0
 

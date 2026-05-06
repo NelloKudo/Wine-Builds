@@ -1,4 +1,4 @@
-From c9a9f0ca9fb929ba421ad166e6ea40abc364a01e Mon Sep 17 00:00:00 2001
+From d58074c1af64d54a6f7e10f61855fea20469ac04 Mon Sep 17 00:00:00 2001
 From: Paul Gofman <pgofman@codeweavers.com>
 Date: Tue, 15 Feb 2022 17:20:40 +0300
 Subject: [PATCH 1/6] fsync: Add WINE_FSYNC_SIMULATE_SCHED_QUANTUM config
@@ -13,10 +13,10 @@ CW-Bug-Id: #20155
  2 files changed, 11 insertions(+)
 
 diff --git a/dlls/ntdll/unix/env.c b/dlls/ntdll/unix/env.c
-index 88689e95037..faf269177e1 100644
+index a8c661920af..7317a9afed3 100644
 --- a/dlls/ntdll/unix/env.c
 +++ b/dlls/ntdll/unix/env.c
-@@ -74,6 +74,7 @@ static const WCHAR bootstrapW[] = {'W','I','N','E','B','O','O','T','S','T','R','
+@@ -75,6 +75,7 @@ static const WCHAR bootstrapW[] = {'W','I','N','E','B','O','O','T','S','T','R','
  int main_argc = 0;
  char **main_argv = NULL;
  WCHAR **main_wargv = NULL;
@@ -24,7 +24,7 @@ index 88689e95037..faf269177e1 100644
  
  static LCID user_lcid, system_lcid;
  static LANGID user_ui_language;
-@@ -823,6 +824,7 @@ static void init_locale(void)
+@@ -824,6 +825,7 @@ static void init_locale(void)
  void init_environment(void)
  {
      USHORT *case_table;
@@ -32,7 +32,7 @@ index 88689e95037..faf269177e1 100644
  
      init_unix_codepage();
      init_locale();
-@@ -832,6 +834,14 @@ void init_environment(void)
+@@ -833,6 +835,14 @@ void init_environment(void)
          uctable = case_table + 2;
          lctable = case_table + case_table[1] + 2;
      }
@@ -48,10 +48,10 @@ index 88689e95037..faf269177e1 100644
  
  
 diff --git a/dlls/ntdll/unix/unix_private.h b/dlls/ntdll/unix/unix_private.h
-index eea0670f0f0..75f3f3e519f 100644
+index c0ce39101ef..6b468910b6e 100644
 --- a/dlls/ntdll/unix/unix_private.h
 +++ b/dlls/ntdll/unix/unix_private.h
-@@ -205,6 +205,7 @@ extern BOOL is_prefix_bootstrap;
+@@ -211,6 +211,7 @@ extern BOOL is_prefix_bootstrap;
  extern int main_argc;
  extern char **main_argv;
  extern WCHAR **main_wargv;
@@ -60,5 +60,5 @@ index eea0670f0f0..75f3f3e519f 100644
  extern unsigned int supported_machines_count;
  extern USHORT supported_machines[8];
 -- 
-2.53.0
+2.54.0
 

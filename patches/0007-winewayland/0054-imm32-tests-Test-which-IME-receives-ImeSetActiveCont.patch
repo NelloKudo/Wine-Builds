@@ -1,8 +1,8 @@
-From 061e23daecf0089d273cc323a51dd089dd832a20 Mon Sep 17 00:00:00 2001
+From ac6c5d6727e04b89f2515d0c9c5dec9e73f41e58 Mon Sep 17 00:00:00 2001
 From: Ziia Shi <mkrsym1@gmail.com>
 Date: Tue, 3 Feb 2026 18:30:01 +0100
-Subject: [PATCH 3/4] imm32/tests: Test which IME receives ImeSetActiveContext
- deactivation call after layout change.
+Subject: [PATCH 54/55] imm32/tests: Test which IME receives
+ ImeSetActiveContext deactivation call after layout change.
 
 ---
  dlls/imm32/tests/imm32.c | 21 +++++++++++++++++++++
@@ -41,5 +41,5 @@ index c4d1404f3ea..03fbff21533 100644
      memset( ime_calls, 0, sizeof(ime_calls) );
      ime_call_count = 0;
 -- 
-2.53.0
+2.54.0
 

@@ -1,4 +1,4 @@
-From a029bc5d71d9683b766159f3cb108a4ddadb14fc Mon Sep 17 00:00:00 2001
+From 1db41a641168eece0d567008b20aa3366e43daf4 Mon Sep 17 00:00:00 2001
 From: Paul Gofman <pgofman@codeweavers.com>
 Date: Sun, 12 Apr 2026 13:42:46 -0600
 Subject: [PATCH 4/6] fsync: 8-byte align 'struct fsync_cache'.
@@ -21,5 +21,5 @@ index 962ee595887..d89fcda722c 100644
      enum fsync_type type;
      unsigned int shm_idx;
 -- 
-2.53.0
+2.54.0
 

@@ -1,4 +1,4 @@
-From 5a379f8fee00979b08b5197267b0c40d3526c987 Mon Sep 17 00:00:00 2001
+From 6e46462a02bd81b65bdf52d3b24228ca3d524b18 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Bernon?= <rbernon@codeweavers.com>
 Date: Wed, 23 Nov 2022 01:02:13 +0100
 Subject: [PATCH 5/7] xinput1_3: Introduce a new open_device_at_index helper.
@@ -96,5 +96,5 @@ index 4fd9e42f7ca..9b741032f4f 100644
  {
      int i;
 -- 
-2.53.0
+2.54.0
 
